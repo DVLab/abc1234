@@ -15,7 +15,6 @@
 class V3NtkHandler;
 class V3Property;
 class V3Handler;
-
 // Global V3 Handler
 extern V3Handler v3Handler;
 
@@ -195,6 +194,7 @@ class V3Handler
       V3UI32Vec      _curRefIdVec;     // Current Ref Indices from Base Ntk
       V3UI32Vec      _lastRefIdVec;    // Last Ref Indices from Base Ntk
 };
+
 
 #endif
 

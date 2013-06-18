@@ -36,6 +36,7 @@ const string V3CmdTypeString[] = {
    "Verification",
    "Bdd", // MODIFICATION FOR SoCV BDD
    "SoCV Verification", // MODIFICATION FOR SoCV
+   "SoCV Final",
 };
 
 // Command Categories Enum
@@ -51,7 +52,8 @@ enum V3CmdType
    CMD_TYPE_VERIFY      = 6,
    CMD_TYPE_BDD         = 7, // MODIFICATION FOR SoCV BDD
    CMD_TYPE_SOCV        = 8, // MODIFICATION FOR SoCV BDD
-   CMD_TYPE_TOTAL       = 9  // MODIFICATION FOR SoCV BDD
+   CMD_TYPE_FINAL       = 9,  // MODIFICATION FOR SoCV BDD
+   CMD_TYPE_TOTAL       = 10,  // MODIFICATION FOR SoCV BDD
 };
 
 // Command Execution Status

@@ -35,7 +35,6 @@ V3CmdExecStatus
 V3HelpCmd::exec(const string& option) {
    vector<string> options;
    V3CmdExec::lexOptions(option, options);
-   
    if (options.size() == 0) v3CmdMgr->printHelps();  // without cmd
    else {  // with cmd
       string cmd = "";

@@ -1,0 +1,12 @@
+** Open Case Name: ut1
+** Weighting Factor:  1
+
+** Design Input    : design.v
+** Library Input   : lib.v
+** Output (example): out.v  
+
+** To execute your program
+mapmacro design.v lib.v  out.v
+
+** To Verify the correctness by running Conformal LEC:
+lec -nogui -do dofile >& lec.log
