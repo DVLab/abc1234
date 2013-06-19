@@ -32,12 +32,5 @@ V3_COMMAND(V3WorkNtkCmd,         CMD_TYPE_MANIP);
 V3_COMMAND(V3StrashNtkCmd,       CMD_TYPE_SYNTHESIS);
 V3_COMMAND(V3ReduceNtkCmd,       CMD_TYPE_SYNTHESIS);
 V3_COMMAND(V3RewriteNtkCmd,      CMD_TYPE_SYNTHESIS);
-// SOCV FINAL Command
-V3_COMMAND(V3ReadDesignCmd,      CMD_TYPE_FINAL);
-V3_COMMAND(V3ReadLibraryCmd,     CMD_TYPE_FINAL);
-V3_COMMAND(V3GoCmd,              CMD_TYPE_FINAL);
-V3_COMMAND(V3DebugCmd,           CMD_TYPE_FINAL);
-
-
 #endif
 

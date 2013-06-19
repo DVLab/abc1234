@@ -37,7 +37,7 @@ extern bool initCommonCmd();
 extern bool initBddCmd(); // MODIFICATION FOR SoCV BDD
 extern bool initProveCmd(); // MODIFICATION FOR SoCV BDD
 extern bool initSatCmd(); // MODIFICATION FOR SoCV BDD
-
+extern bool initSfCmd();
 // Program Usage
 static void usage() {
    Msg(MSG_IFO) << "Usage: <v3> [ -File < dofile > ]" << endl; exit(-1);
@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
 
    // Register Commands
    if (!(initAlgCmd() && initNtkCmd() && initVrfCmd() && initTransCmd() && initCommonCmd()
-         && initBddCmd() && initProveCmd() && initSatCmd())) { // MODIFICATION FOR SoCV BDD
+         && initBddCmd() && initProveCmd() && initSatCmd() && initSfCmd() )) { // MODIFICATION FOR SoCV BDD
       Msg(MSG_ERR) << "Command Register Failed !!!" << endl; exit(0);
    }
 
