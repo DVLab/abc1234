@@ -11,5 +11,8 @@
 *.la
 *.a
 
+
+.depend.mak
+.extheader.mak
 .in
 .lib
