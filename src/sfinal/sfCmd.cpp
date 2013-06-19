@@ -18,10 +18,8 @@
 #include <iomanip>
 #include <cstring>
 #include "v3NtkUtil.h"
-#include "satCmd.h"
-//#include "satMgr.h"
+#include "sfMgr.h"
 using namespace std;
-
 
 
 /*
@@ -31,13 +29,8 @@ enum SoCVFinalType {
    SV_LIB,
    SV_OUT
 };*/
-struct SoCVFinal{
-		uint32_t	_designHandler;
-		uint32_t	_libraryHandler;
-//		uint32_t	_outHandler;
-};
 
-static SoCVFinal socvFinal;
+static SfMgr* sfMgr=new SfMgr();
 
 
 bool initSfCmd() {
@@ -68,15 +61,12 @@ V3DebugCmd::exec(const string& option) {
   }
   const string token = options[0];
   if (v3StrNCmp("-design", token, 3) == 0) {
-	 v3Handler.setCurHandlerFromId(socvFinal._designHandler);
+	 v3Handler.setCurHandlerFromId(sfMgr->getDesignHandler());
   }
   else if (v3StrNCmp("-lib", token, 3) == 0) {
-	 v3Handler.setCurHandlerFromId(socvFinal._libraryHandler);
+	 v3Handler.setCurHandlerFromId(sfMgr->getLibraryHandler());
   }
-//  else if (v3StrNCmp("-out", token, 3) == 0) {
-//	 v3Handler.setCurHandlerFromId(socvFinal._outHandler);
-//  }
-  else return V3CmdExec::errorOption(CMD_OPT_ILLEGAL, token);
+ else return V3CmdExec::errorOption(CMD_OPT_ILLEGAL, token);
 
    return CMD_EXEC_DONE;
 }
@@ -88,7 +78,7 @@ V3DebugCmd::usage() const {
 
 void
 V3DebugCmd::help() const {
-   Msg(MSG_IFO) << setw(20) << left << "Debug:" << "Debug" << endl;
+   Msg(MSG_IFO)  << "Debug:" << "Debug" << endl;
 }
 
 //----------------------------------------------------------------------
@@ -96,7 +86,14 @@ V3DebugCmd::help() const {
 //----------------------------------------------------------------------
 V3CmdExecStatus
 V3GoCmd::exec(const string& option) {
-   return CMD_EXEC_DONE;
+	
+	sfMgr->traverseFanin();
+
+
+
+
+
+	return CMD_EXEC_DONE;
 }
 
 void
@@ -106,7 +103,7 @@ V3GoCmd::usage() const {
 
 void
 V3GoCmd::help() const {
-   Msg(MSG_IFO) << setw(20) << left << "GO: " << "GO" << endl;
+   Msg(MSG_IFO)  << "GO: " << "GO" << endl;
 }
 //----------------------------------------------------------------------
 // REAd Library <(string fileName)> 
@@ -125,17 +122,7 @@ V3ReadLibraryCmd::exec(const string& option) {
   if(options.size()<1){
    return V3CmdExec::errorOption(CMD_OPT_MISSING, "<string filenName>");
   }
- /*
-  const string token = options[0];
-  if (v3StrNCmp("-design", token, 2) == 0) {
-    golden = true;
-  }
-  else if (v3StrNCmp("-output", token, 2) == 0) {
-    revised = true;
-  }
-  else return V3CmdExec::errorOption(CMD_OPT_ILLEGAL, token);
 
-*/
   const string token2 = options[0];
   fileName = token2;
    if (fileName == "") return V3CmdExec::errorOption(CMD_OPT_MISSING, "<(string fileName)>");
@@ -145,7 +132,9 @@ V3ReadLibraryCmd::exec(const string& option) {
    if (!inputHandler) Msg(MSG_ERR) << "Parse Failed !!" << endl;
    else {
    	v3Handler.pushAndSetCurHandler(inputHandler);
-	socvFinal._libraryHandler=v3Handler.getCurHandlerId();
+	V3Ntk* ntk= new V3Ntk();
+	*ntk = *(inputHandler->getNtk());
+	sfMgr->addLibrary(v3Handler.getCurHandlerId(),ntk);
 	}
    return CMD_EXEC_DONE;
 }
@@ -157,7 +146,7 @@ V3ReadLibraryCmd::usage() const {
 
 void
 V3ReadLibraryCmd::help() const {
-   Msg(MSG_IFO) << setw(20) << left << "REAd Library: " << "Read RTL (Verilog) Library." << endl;
+   Msg(MSG_IFO)  << "REAd Library: " << "Read RTL (Verilog) Library." << endl;
 }
 
 //----------------------------------------------------------------------
@@ -174,18 +163,6 @@ V3ReadDesignCmd::exec(const string& option) {
   if(options.size()<1){
    return V3CmdExec::errorOption(CMD_OPT_MISSING, "<(string fileName)>");
   }
- /* if(options.size()<1){
-   return V3CmdExec::errorOption(CMD_OPT_MISSING, "<-GOLden | -REVised>");
-  }
-  const string& token = options[0];
-  if (v3StrNCmp("-GOLden", token, 3) == 0) {
-    golden = true;
-  }
-  else if (v3StrNCmp("-REVised", token, 3) == 0) {
-    revised = true;
-  }
-  else return V3CmdExec::errorOption(CMD_OPT_ILLEGAL, token);
-*/
   const string& token2 = options[0];
   fileName = token2;
    if (fileName == "") return V3CmdExec::errorOption(CMD_OPT_MISSING, "<(string fileName)>");
@@ -195,7 +172,9 @@ V3ReadDesignCmd::exec(const string& option) {
 
    else{
 		v3Handler.pushAndSetCurHandler(inputHandler);
-		socvFinal._designHandler=v3Handler.getCurHandlerId();
+		V3Ntk* ntk= new V3Ntk();
+		*ntk = *(inputHandler->getNtk());
+		sfMgr->setDesign(v3Handler.getCurHandlerId(),ntk);
 	}
    return CMD_EXEC_DONE;
 }
@@ -207,5 +186,5 @@ V3ReadDesignCmd::usage() const {
 
 void
 V3ReadDesignCmd::help() const {
-   Msg(MSG_IFO) << setw(20) << left << "REAd Design: " << "Read RTL (Verilog) Design." << endl;
+   Msg(MSG_IFO)   << "REAd Design: " << "Read RTL (Verilog) Design." << endl;
 }
