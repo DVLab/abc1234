@@ -66,12 +66,15 @@ int main(int argc, char** argv) {
    }
 
    // Dofile
+   
    if (dof) {
       if (dofile.size() == 0) { Msg(MSG_ERR) << "Missing Argument \"< dofile >\" !!" << endl; usage(); }
       else if (!v3CmdMgr->openDofile(dofile.c_str())) {
          Msg(MSG_ERR) << "Cannot Open File \"" << dofile << "\" !!" << endl; usage();
       }
    }
+
+
    // Start Program
    V3CmdExecStatus status = CMD_EXEC_DONE;
    while (status != CMD_EXEC_QUIT) {

@@ -6,8 +6,6 @@
   Copyright    [ Copyright(c) 2013 LaDs(III), GIEE, NTU, Taiwan ]
 ****************************************************************************/
 
-#ifndef SF_CMD_C
-#define SF_CMD_C
 
 #include "v3Msg.h"
 #include "v3StrUtil.h"
@@ -17,10 +15,15 @@
 #include "v3NtkWriter.h"
 #include "v3NtkSimplify.h"
 #include "sfCmd.h"
-
 #include <iomanip>
-
+#include <cstring>
+#include "v3NtkUtil.h"
+#include "satCmd.h"
+//#include "satMgr.h"
 using namespace std;
+
+
+
 /*
 enum SoCVFinalType {
    // Internal Admitted Types
@@ -31,12 +34,11 @@ enum SoCVFinalType {
 struct SoCVFinal{
 		uint32_t	_designHandler;
 		uint32_t	_libraryHandler;
-		uint32_t	_outHandler;
+//		uint32_t	_outHandler;
 };
 
 static SoCVFinal socvFinal;
 
-//extern SATMgr satMgr;
 
 bool initSfCmd() {
    // Set 1'b0 and [0:0] 0 to V3BVXId and V3BusId, respectively
@@ -71,9 +73,9 @@ V3DebugCmd::exec(const string& option) {
   else if (v3StrNCmp("-lib", token, 3) == 0) {
 	 v3Handler.setCurHandlerFromId(socvFinal._libraryHandler);
   }
-  else if (v3StrNCmp("-out", token, 3) == 0) {
-	 v3Handler.setCurHandlerFromId(socvFinal._outHandler);
-  }
+//  else if (v3StrNCmp("-out", token, 3) == 0) {
+//	 v3Handler.setCurHandlerFromId(socvFinal._outHandler);
+//  }
   else return V3CmdExec::errorOption(CMD_OPT_ILLEGAL, token);
 
    return CMD_EXEC_DONE;
@@ -107,7 +109,7 @@ V3GoCmd::help() const {
    Msg(MSG_IFO) << setw(20) << left << "GO: " << "GO" << endl;
 }
 //----------------------------------------------------------------------
-// REAd Library <-GOLden | -REVised> <(string fileName)> 
+// REAd Library <(string fileName)> 
 //----------------------------------------------------------------------
 V3CmdExecStatus
 V3ReadLibraryCmd::exec(const string& option) {
@@ -115,24 +117,26 @@ V3ReadLibraryCmd::exec(const string& option) {
    V3CmdExec::lexOptions(option, options);
 
    string fileName = ""; 
-   bool golden=false,revised=false;
-
+//   bool golden=false,revised=false;
+/*
   if(options.size()<2){
    return V3CmdExec::errorOption(CMD_OPT_MISSING, "<(string fileName)>");
-  }
+ }*/
   if(options.size()<1){
-   return V3CmdExec::errorOption(CMD_OPT_MISSING, "<-GOLden | -REVised>");
+   return V3CmdExec::errorOption(CMD_OPT_MISSING, "<string filenName>");
   }
+ /*
   const string token = options[0];
-  if (v3StrNCmp("-GOLden", token, 3) == 0) {
+  if (v3StrNCmp("-design", token, 2) == 0) {
     golden = true;
   }
-  else if (v3StrNCmp("-REVised", token, 3) == 0) {
+  else if (v3StrNCmp("-output", token, 2) == 0) {
     revised = true;
   }
   else return V3CmdExec::errorOption(CMD_OPT_ILLEGAL, token);
 
-  const string token2 = options[1];
+*/
+  const string token2 = options[0];
   fileName = token2;
    if (fileName == "") return V3CmdExec::errorOption(CMD_OPT_MISSING, "<(string fileName)>");
 
@@ -148,7 +152,7 @@ V3ReadLibraryCmd::exec(const string& option) {
 
 void
 V3ReadLibraryCmd::usage() const {
-   Msg(MSG_IFO) << " REAd Library [-golden | -revised] <(string fileName)> " << endl;
+   Msg(MSG_IFO) << " REAd Library <(string fileName)> " << endl;
 }
 
 void
@@ -157,7 +161,7 @@ V3ReadLibraryCmd::help() const {
 }
 
 //----------------------------------------------------------------------
-// REAd Design <-GOLden | -REVised> <(string fileName)> 
+// REAd Design <(string fileName)> 
 //----------------------------------------------------------------------
 V3CmdExecStatus
 V3ReadDesignCmd::exec(const string& option) {
@@ -165,12 +169,12 @@ V3ReadDesignCmd::exec(const string& option) {
    V3CmdExec::lexOptions(option, options);
 
    string fileName = ""; 
-   bool golden=false,revised=false;
+//   bool golden=false,revised=false;
 
-  if(options.size()<2){
+  if(options.size()<1){
    return V3CmdExec::errorOption(CMD_OPT_MISSING, "<(string fileName)>");
   }
-  if(options.size()<1){
+ /* if(options.size()<1){
    return V3CmdExec::errorOption(CMD_OPT_MISSING, "<-GOLden | -REVised>");
   }
   const string& token = options[0];
@@ -181,8 +185,8 @@ V3ReadDesignCmd::exec(const string& option) {
     revised = true;
   }
   else return V3CmdExec::errorOption(CMD_OPT_ILLEGAL, token);
-
-  const string& token2 = options[1];
+*/
+  const string& token2 = options[0];
   fileName = token2;
    if (fileName == "") return V3CmdExec::errorOption(CMD_OPT_MISSING, "<(string fileName)>");
 
@@ -190,24 +194,18 @@ V3ReadDesignCmd::exec(const string& option) {
    if (!inputHandler) Msg(MSG_ERR) << "Parse Failed !!" << endl;
 
    else{
-   	v3Handler.pushAndSetCurHandler(inputHandler);
-	if(golden){
+		v3Handler.pushAndSetCurHandler(inputHandler);
 		socvFinal._designHandler=v3Handler.getCurHandlerId();
-	}
-	else{
-		socvFinal._outHandler=v3Handler.getCurHandlerId();
-	}
 	}
    return CMD_EXEC_DONE;
 }
 
 void
 V3ReadDesignCmd::usage() const {
-   Msg(MSG_IFO) << " REAd Design [-golden | -revised] <(string fileName)> " << endl;
+   Msg(MSG_IFO) << " REAd Design <(string fileName)> " << endl;
 }
 
 void
 V3ReadDesignCmd::help() const {
    Msg(MSG_IFO) << setw(20) << left << "REAd Design: " << "Read RTL (Verilog) Design." << endl;
 }
-#endif
