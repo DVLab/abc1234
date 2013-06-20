@@ -16,6 +16,7 @@ class SfMgr{
 public:
 	void run(){};
 	void traverseFanin();
+    unsigned splitModule(const string&,vector<string>&); 
 	uint32_t getDesignHandler(){
 		return _designHandler;
 	}

@@ -126,16 +126,20 @@ V3ReadLibraryCmd::exec(const string& option) {
   const string token2 = options[0];
   fileName = token2;
    if (fileName == "") return V3CmdExec::errorOption(CMD_OPT_MISSING, "<(string fileName)>");
-
-   V3NtkInput* inputHandler = V3NtkFromQuteRTL(fileName.c_str(), false);
-
-   if (!inputHandler) Msg(MSG_ERR) << "Parse Failed !!" << endl;
-   else {
-   	v3Handler.pushAndSetCurHandler(inputHandler);
-	V3Ntk* ntk= new V3Ntk();
-	*ntk = *(inputHandler->getNtk());
-	sfMgr->addLibrary(v3Handler.getCurHandlerId(),ntk);
-	}
+   vector<string> moduleNames;
+   unsigned moduleNums=sfMgr->splitModule(fileName,moduleNames);
+   V3NtkInput* inputHandler;
+   for(unsigned i=0;i<moduleNums;++i){
+      inputHandler = V3NtkFromQuteRTL(moduleNames[i].c_str(), false);
+   
+       if (!inputHandler) Msg(MSG_ERR) << "Parse Failed !!" << endl;
+       else {
+        v3Handler.pushAndSetCurHandler(inputHandler);
+        V3Ntk* ntk= new V3Ntk();
+        *ntk = *(inputHandler->getNtk());
+        sfMgr->addLibrary(v3Handler.getCurHandlerId(),ntk);
+        }
+   }
    return CMD_EXEC_DONE;
 }
 

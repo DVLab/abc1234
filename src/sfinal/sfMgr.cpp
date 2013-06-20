@@ -33,3 +33,36 @@ SfMgr::traverseFanin(){
 		cout<<"i:"<<i<<" name:"<< v3Handler.getCurHandler()->getNetNameOrFormedWithId(netid)<<endl;
   }
 }
+
+unsigned SfMgr::splitModule(const string& fileName,vector<string>& moduleNames){
+    cerr<<"split module\n";
+    ifstream ifile(fileName.c_str());
+    if(!ifile){
+        cout<<"Unable to open file"<<endl;
+        return 0;
+    }
+    string line;
+    unsigned ret=0;
+    while(ifile.good()){
+        ifile>>line;
+        if(line=="module"){
+            ++ret;
+            getline(ifile,line,'(');
+            line=line.substr(line.find_first_not_of(" \n\r\t"));
+            moduleNames.push_back(line);
+            ofstream ofile;
+            ofile.open(line.c_str(),ios::out|ios::trunc);
+            ofile<<"module "<<line<<'(';
+            while(ifile.good()){
+                getline(ifile,line);
+                ofile<<line<<endl;
+                size_t found=line.find("endmodule");
+                if(found==string::npos)
+                    continue;
+                ofile.close();
+                break;
+            }
+        }
+    }
+    return ret;
+}
