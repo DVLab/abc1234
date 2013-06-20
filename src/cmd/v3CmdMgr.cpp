@@ -232,10 +232,26 @@ V3CmdExecStatus
 V3CmdMgr::execOneCmd() {
    // Read User Command Input
    char* execCmd = 0;
-   if (_dofile.is_open()) {
+   if (_dofile.is_open()) {//cout<<"inin"<<endl;
       execCmd = new char[1024]; _dofile.getline(execCmd, 1024);
+		//cout<<execCmd<<endl;
       cout << getPrompt() << execCmd << endl;
       if (_dofile.eof()) closeDofile();
+   }
+   else if(finaldone != 0){
+      string temp;
+      if(finaldone == 3){
+         temp = "read d "+_design;
+      }
+      else if(finaldone == 2){
+         temp = "read l "+_lib;
+      }
+      else if(finaldone == 1){
+         temp = "write rtl "+_output+" -s";
+      }
+      execCmd = const_cast<char *>(temp.c_str());
+      cout << getPrompt() << execCmd << endl;
+      finaldone -- ;
    }
    else execCmd = readline(getPrompt().c_str());
    assert (execCmd);

@@ -46,10 +46,25 @@ static void usage() {
 int main(int argc, char** argv) {
    bool dof = false, dofON = false;
    string dofile = "";
+	string design = "";
+	string lib = "";
+	string output = "";
    
    // Set Random Number Seed
    srand(time(NULL));
 
+   for (int i = 1; i < argc; ++i) {
+      if(i > 3)
+         Msg(MSG_ERR) <<"Erroe Input"<<endl;
+      else if( i == 1)
+         design = argv[i];
+      else if( i == 2)
+         lib = argv[i];
+      else if( i == 3)
+         output = argv[i];
+   }
+
+/*
    for (int i = 1; i < argc; ++i) {
       if (v3StrNCmp("-File", argv[i], 2) == 0) {
          if (dof) { Msg(MSG_ERR) << "Extra Argument \"" << argv[i] << "\" !!" << endl; usage(); }
@@ -58,7 +73,8 @@ int main(int argc, char** argv) {
       else if (dofON) { dofile = argv[i]; dofON = false; }
       else { Msg(MSG_ERR) << "Unknown Argument \"" << argv[i] << "\" !!" << endl; usage(); }
    }
-
+*/
+   v3CmdMgr->setFileName(design,lib,output);
    // Register Commands
    if (!(initAlgCmd() && initNtkCmd() && initVrfCmd() && initTransCmd() && initCommonCmd()
          && initBddCmd() && initProveCmd() && initSatCmd() && initSfCmd() )) { // MODIFICATION FOR SoCV BDD

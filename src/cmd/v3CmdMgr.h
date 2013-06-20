@@ -148,6 +148,7 @@ class V3CmdMgr
       // Command Prompt Settings
       inline const string& getPrompt() const { return _prompt; }
       inline void setPrompt() { _prompt = _defaultPrompt + "> "; }
+      inline void setFileName(string design,string lib,string output) {_design = design;_lib = lib;_output = output;finaldone=3;}
    private :
       // Command Helper Functions
       bool addHistory(char*);
@@ -158,6 +159,8 @@ class V3CmdMgr
       ifstream       _dofile;                // For Script Parsing
       V3CmdExecSet   _cmdLib;                // All Available Commands
       vector<string> _history;               // Command History Copy
+      string         _design,_lib,_output;   // for final
+      int            finaldone;              // for final
 };
 
 #endif
