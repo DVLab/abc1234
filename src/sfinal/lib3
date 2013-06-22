@@ -1,5 +1,0 @@
-module lib3(in, out);
-  input  [31:0] in;
-  output        out;
-  assign out = ^in;
-endmodule

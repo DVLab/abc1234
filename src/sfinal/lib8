@@ -1,6 +1,0 @@
-module lib8(in1, in2, out);
-  input [16:0] in1;
-  input [16:0] in2;
-  output [16:0] out;
-  assign out = in1 + in2;
-endmodule
