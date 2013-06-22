@@ -11,6 +11,14 @@
 
 #include<vector>
 #include "v3Ntk.h"
+#include "sfMgr.h"
+#include "v3NtkInput.h"
+#include "v3NtkUtil.h"
+#include "v3Type.h"
+#include "satMgr.h"
+#include "v3Msg.h"
+using namespace std;
+
 using namespace std;
 class SfMgr{
 public:
@@ -23,19 +31,19 @@ public:
 	uint32_t getLibraryHandler(uint32_t i=0){
 		return _libraryHandler[i];
 	}
-	void setDesign(uint32_t id,V3Ntk* ntk){
+	void setDesign(uint32_t id,V3BvNtk* ntk){
 		_designHandler=id;
 		_designNtk=ntk;
 	}
-	void addLibrary(uint32_t id,V3Ntk* ntk){
+	void addLibrary(uint32_t id,V3BvNtk* ntk){
 		_libraryHandler.push_back(id);
 		_libraryNtk.push_back(ntk);
 	}
 private:
 	uint32_t	_designHandler;
 	vector<uint32_t>	_libraryHandler;
-    V3Ntk* _designNtk;
-	vector<V3Ntk*> _libraryNtk;
+    V3BvNtk* _designNtk;
+	vector<V3BvNtk*> _libraryNtk;
 //		uint32_t	_outHandler;
 };
 

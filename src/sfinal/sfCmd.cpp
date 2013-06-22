@@ -135,8 +135,8 @@ V3ReadLibraryCmd::exec(const string& option) {
        if (!inputHandler) Msg(MSG_ERR) << "Parse Failed !!" << endl;
        else {
         v3Handler.pushAndSetCurHandler(inputHandler);
-        V3Ntk* ntk= new V3Ntk();
-        *ntk = *(inputHandler->getNtk());
+        V3BvNtk* ntk= new V3BvNtk();
+        *ntk = *((V3BvNtk*)inputHandler->getNtk());
         sfMgr->addLibrary(v3Handler.getCurHandlerId(),ntk);
         }
    }
@@ -176,8 +176,8 @@ V3ReadDesignCmd::exec(const string& option) {
 
    else{
 		v3Handler.pushAndSetCurHandler(inputHandler);
-		V3Ntk* ntk= new V3Ntk();
-		*ntk = *(inputHandler->getNtk());
+		V3BvNtk* ntk= new V3BvNtk();
+		*ntk = *((V3BvNtk*)inputHandler->getNtk());
 		sfMgr->setDesign(v3Handler.getCurHandlerId(),ntk);
 	}
    return CMD_EXEC_DONE;
