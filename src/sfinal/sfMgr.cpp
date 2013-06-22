@@ -63,18 +63,8 @@ SfMgr::traverseFanin(){
 
   V3NtkInput* inputHandler = new V3NtkInput(false,"new_ntk");
 
-//  V3Ntk* new_ntk=new V3Ntk();
-  
-
-   V3BvNtk* new_ntk=(V3BvNtk*)( inputHandler->getNtk());
-//   V3BvNtk* new_ntk=new V3BvNtk();
-   
-//   (V3BvNtk*)inputHandler->getNtk();
- //  assert(createInput(new_ntk,new_nid));
+	V3BvNtk* new_ntk=(V3BvNtk*)( inputHandler->getNtk());
    V3NtkHandler* curHandler= v3Handler.getCurHandler();
-
-
-  
 
   for(unsigned i=0;i<orderedNets.size();i++){
 	   V3NetId  netid=	orderedNets[i];
@@ -92,111 +82,47 @@ SfMgr::traverseFanin(){
 			 if (isV3PairType(type)) {
 				const string name1 = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 0)); assert (name1.size());
 				const string name2 = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 1)); assert (name2.size());
-
 			   V3NetId new_nid0=getNewNetId(_designNtk->getInputNetId(netid, 0));
-			   //=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 0) ));
 			   V3NetId new_nid1=getNewNetId(_designNtk->getInputNetId(netid, 1));
-			   //=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 1) ));
-			
 				assert(createBvPairGate(new_ntk,type, new_nid, new_nid0,new_nid1));
-				if (BV_MERGE == type) name = "{" + name1 + ", " + name2 + "}";
-				else {
-
-				   switch (type) {
-					  case BV_AND      : name = "(" + name1 + " & "  + name2 + ")"; break;
-					  case BV_XOR      : name = "(" + name1 + " ^ "  + name2 + ")"; break;
-					  case BV_ADD      : name = "(" + name1 + " + "  + name2 + ")"; break;
-					  case BV_SUB      : name = "(" + name1 + " - "  + name2 + ")"; break;
-					  case BV_MULT     : name = "(" + name1 + " * "  + name2 + ")"; break;
-					  case BV_SHL      : name = "(" + name1 + " << " + name2 + ")"; break;
-					  case BV_SHR      : name = "(" + name1 + " >> " + name2 + ")"; break;
-					  case BV_DIV      : name = "(" + name1 + " / "  + name2 + ")"; break;
-					  case BV_MODULO   : name = "(" + name1 + " % "  + name2 + ")"; break;
-					  case BV_EQUALITY : name = "(" + name1 + (netid.cp ? " != " : " == ") + name2 + ")";break;
-					  case BV_GEQ      : name = "(" + name1 + (netid.cp ? " < "  : " >= ") + name2 + ")";break;
-					  default          : assert (0);
-				   }
-				}
 			 }
 			 else if (isV3ReducedType(type)) {//OK
 				const string name1 = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 0)); assert (name1.size());
 				
 			   V3NetId new_nid0=getNewNetId(_designNtk->getInputNetId(netid, 0));
-			   //new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 0) ));
 				assert(createBvReducedGate(new_ntk,type, new_nid,new_nid0));
-				switch (type) {
-				   case BV_RED_AND :
-				   name = "(&" + name1 + ")"; 
-				   break;
-				   case BV_RED_OR  : 
-				   name = "(|" + name1 + ")"; 
-				   break;
-				   case BV_RED_XOR :
-				   name = "(^" + name1 + ")"; 
-				   break;
-				   default         : assert (0);
-				}
-
 			 }
 			 else if (BV_MUX == type) {//OK
-				const string fName = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 0)); assert (fName.size());
-				const string tName = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 1)); assert (tName.size());
-				const string sName = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 2)); assert (sName.size());
-			 	
 			   V3NetId new_nid0=getNewNetId(_designNtk->getInputNetId(netid, 0));
 			   V3NetId new_nid1=getNewNetId(_designNtk->getInputNetId(netid, 1));
 			   V3NetId new_nid2=getNewNetId(_designNtk->getInputNetId(netid, 2));
-			   // V3NetId new_nid0=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 0) ));
-			   // V3NetId new_nid1=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 1) ));
-			   // V3NetId new_nid2=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 2) ));
 				assert(createBvMuxGate(new_ntk,new_nid, new_nid0,new_nid1,new_nid2));
-				name = "(" + sName + " ? " + tName + " : " + fName + ")";
 			 }
 			 else if (BV_SLICE == type) {//OK
-				const string name1 = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 0)); assert (name1.size());
-
 			   V3NetId new_nid0=getNewNetId(_designNtk->getInputNetId(netid, 0));
-			   // V3NetId new_nid0=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 0) ));
-				cout<<"width 1:"<<new_ntk->getNetWidth(new_nid)<<endl;
-	   			cout<<"width 2:"<<new_ntk->getNetWidth(new_nid0)<<endl;
-				cout<<"width 3:"<<static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 0)) <<endl;
-				cout<<"width 4:"<<static_cast<V3BvNtk*>(_designNtk)->getNetWidth(netid) <<endl;
 				const uint32_t msb = static_cast<V3BvNtk*>(_designNtk)->getInputSliceBit(netid, true);
 				const uint32_t lsb = static_cast<V3BvNtk*>(_designNtk)->getInputSliceBit(netid, false);
-				const uint32_t width = _designNtk->getNetWidth(_designNtk->getInputNetId(netid, 0)); assert (width);
-				cout<<"msb:"<<msb<<" lsb:"<<lsb<<endl;
+
 			 	assert(createBvSliceGate(new_ntk,new_nid, new_nid0, msb,lsb));
-				name = ((msb >= lsb) && (width == (1 + msb - lsb))) ? name1 : 
-					   (msb == lsb) ? (name1 + "[" + v3Int2Str(msb) + "]") : 
-					   (name1 + "[" + v3Int2Str(msb) + " : " + v3Int2Str(lsb) + "]");
 			 }
 			 else if(BV_CONST == type){//OK
-			//	const V3BitVecX* const value = static_cast<V3BvNtk*>(_designNtk)->getInputConstValue(netid); assert (value);
-			//	cout<<"to:"<<value->toExp()<<endl;
-			//	cout<<"reg:"<<value->regEx()<<endl;
-			// 	assert(createBvConstGate(new_ntk,new_nid, v3Int2Str(value->size())+"'b"+value->regEx()));
-			//	name= v3Int2Str(value->size()) + "'b" + (netid.cp ? (~(*value)).regEx() : value->regEx());
+			 
 			 }
 			 else if (AIG_NODE == type) {
-				const string name1 = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 0)); assert (name1.size());
-				const string name2 = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 1)); assert (name2.size());
-				name = name1 + " && " + name2;
+			 	assert(0);
 			 }
 			 else if(AIG_FALSE == type){
-				name= (netid.cp ? "AIGER_TRUE" : "AIGER_FALSE");
+			 	assert(0);
 			 }
 			 else if(V3_PI ==type){//OK
 			    assert(createInput(new_ntk,new_nid));
-				cout<<"IO type:"<<V3GateTypeStr[type]<<endl;
 			 }
 			 else if(V3_PIO==type){//OK
 				assert(createInout(new_ntk,new_nid));
-				cout<<"IO type:"<<V3GateTypeStr[type]<<endl;
 			 }
 			 else{
-				cout<<"UNKNOWN"<<V3GateTypeStr[type]<<endl;
+				assert(0);
 			 }
-//   	cout<<netid.id<<" "<< (netid.cp ? "~" : "") + name<<endl;
   }
   for(uint32_t i=0,j=_designNtk->getOutputSize();i<j;++i){
       V3NetId outid=_designNtk->getOutput(i);
