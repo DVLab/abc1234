@@ -1,0 +1,10 @@
+module lib14(in1, in2, in3, in4, in5, in6, out);
+  input [17:0] in1;
+  input [17:0] in2;
+  input [17:0] in3;
+  input [17:0] in4;
+  input [17:0] in5;
+  input [17:0] in6;
+  output [17:0] out;
+  assign out = in1 * in2 + in3 * in4 + in5 * in6;
+endmodule

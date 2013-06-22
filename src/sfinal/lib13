@@ -1,0 +1,8 @@
+module lib13(in1, in2, in3, in4, out);
+  input [16:0] in1;
+  input [16:0] in2;
+  input [16:0] in3;
+  input [16:0] in4;
+  output [16:0] out;
+  assign out = in1 * in2 + in3 * in4;
+endmodule

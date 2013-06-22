@@ -17,5 +17,6 @@ V3_COMMAND(V3ReadDesignCmd,      CMD_TYPE_FINAL);
 V3_COMMAND(V3ReadLibraryCmd,     CMD_TYPE_FINAL);
 V3_COMMAND(V3GoCmd,              CMD_TYPE_FINAL);
 V3_COMMAND(V3DebugCmd,           CMD_TYPE_FINAL);
+V3_COMMAND(V3ReplaceCmd,         CMD_TYPE_FINAL);
 
 #endif
