@@ -73,6 +73,7 @@ SfMgr::traverseFanin(){
 		cout<<"i:"<<netid.id<<" name:"<< name <<" type:"<<V3GateTypeStr[type]<<endl;
 		
 	   V3NetId new_nid=inputHandler->createNet(name ,static_cast<V3BvNtk*>(_designNtk)->getNetWidth(netid));
+	   new_nid.cp = netid.cp;
 	  netidMap[netid.id]=new_nid;
 
 		cout<<"getGateType:"<<V3GateTypeStr[new_ntk->getGateType(new_nid)]<<endl;
