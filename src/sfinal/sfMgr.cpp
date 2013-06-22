@@ -11,6 +11,7 @@
 #include "satMgr.h"
 #include "v3Msg.h"
 #include "v3StrUtil.h"
+#include<algorithm>
 using namespace std;
 
 extern const bool v3Str2Int(const string&, int&);
@@ -78,7 +79,7 @@ SfMgr::traverseFanin(){
   for(unsigned i=0;i<orderedNets.size();i++){
 	   V3NetId  netid=	orderedNets[i];
 	   const V3GateType& type = _designNtk->getGateType(netid);
-	   string name =curHandler-> getNetName(netid);
+	   string name =curHandler-> getNetNameOrFormedWithId(netid);
 		cout<<"i:"<<netid.id<<" name:"<< name <<" type:"<<V3GateTypeStr[type]<<endl;
 		
 	   V3NetId new_nid=inputHandler->createNet(name+"_"+ v3Int2Str(netid.id) ,static_cast<V3BvNtk*>(_designNtk)->getNetWidth(netid));
@@ -197,20 +198,32 @@ SfMgr::traverseFanin(){
 			 }
    	cout<<netid.id<<" "<< (netid.cp ? "~" : "") + name<<endl;
   }
-
+  for(uint32_t i=0,j=_designNtk->getOutputSize();i<j;++i){
+      V3NetId outid=_designNtk->getOutput(i);
+      V3NetId new_outid=getNewNetId(outid);
+      new_ntk->createOutput(new_outid);
+  }
   orderedNets.clear();
   orderedNets.reserve(_designNtk->getNetSize());
 //  targetNets.push_back(id);
   dfsNtkForGeneralOrder(_designNtk,orderedNets);
   assert (orderedNets.size() <= _designNtk->getNetSize());
+  vector<string> strVec;
+  strVec.clear();
 	cout<<"*****ORIGINAL CIRCUIT*****"<<endl;
 	for(unsigned i=0;i<orderedNets.size();i++){
 		V3NetId netid=	orderedNets[i];
 		const V3GateType& type = _designNtk->getGateType(netid);
-	   string name =curHandler->getNetName(netid);
-		cout<<"i:"<<netid.id<<" name:"<< name <<" type:"<<V3GateTypeStr[type]<<endl;
-		cout<<"i:"<<netid.id <<" name:"<< name << " type:"<<(netid.cp ? "~" : "")<< V3GateTypeStr[type]<<endl;
+	   string name =curHandler->getNetNameOrFormedWithId(netid);
+		//cout<<"i:"<<netid.id <<" name:"<< name << " type:"<<(netid.cp ? "~" : "")<< V3GateTypeStr[type]<<endl;
+		//cout<<"i:"<<netid.id <<" type:"<<(netid.cp ? "~" : "")<< V3GateTypeStr[type]<<endl;
+        string str=V3GateTypeStr[type]+(netid.cp?"~":"")+" name:"+name;
+        strVec.push_back(str);
 	}
+  sort(strVec.begin(),strVec.end());
+  for(unsigned i=0;i<strVec.size();++i)
+      cout<<i<<": "<<strVec[i]<<endl;
+  strVec.clear();
   orderedNets.clear();
   orderedNets.reserve(new_ntk->getNetSize());
 //  targetNets.push_back(id);
@@ -222,8 +235,15 @@ SfMgr::traverseFanin(){
 		const V3GateType& type = new_ntk->getGateType(netid);
 	    string name ="";
 		inputHandler->getNetName(netid,name);
-		cout<<"i:"<<netid.id <<" name:"<< name << " type:"<<(netid.cp ? "~" : "")<< V3GateTypeStr[type]<<endl;
-  }
+		//cout<<"i:"<<netid.id <<" name:"<< name << " type:"<<(netid.cp ? "~" : "")<< V3GateTypeStr[type]<<endl;
+		//cout<<"i:"<<netid.id <<" type:"<<(netid.cp ? "~" : "")<< V3GateTypeStr[type]<<endl;
+        string str=V3GateTypeStr[type]+(netid.cp?"~":"")+" name:"+name;
+        strVec.push_back(str);
+	}
+  sort(strVec.begin(),strVec.end());
+  for(unsigned i=0;i<strVec.size();++i)
+      cout<<i<<": "<<strVec[i]<<endl;
+  strVec.clear();
 }
 
 
