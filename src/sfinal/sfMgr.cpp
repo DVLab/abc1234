@@ -82,7 +82,7 @@ SfMgr::traverseFanin(){
 	   string name =curHandler-> getNetNameOrFormedWithId(netid);
 		cout<<"i:"<<netid.id<<" name:"<< name <<" type:"<<V3GateTypeStr[type]<<endl;
 		
-	   V3NetId new_nid=inputHandler->createNet(name+"_"+ v3Int2Str(netid.id) ,static_cast<V3BvNtk*>(_designNtk)->getNetWidth(netid));
+	   V3NetId new_nid=inputHandler->createNet(name ,static_cast<V3BvNtk*>(_designNtk)->getNetWidth(netid));
 	  netidMap[netid.id]=new_nid;
 
 		cout<<"getGateType:"<<V3GateTypeStr[new_ntk->getGateType(new_nid)]<<endl;
@@ -171,11 +171,11 @@ SfMgr::traverseFanin(){
 					   (name1 + "[" + v3Int2Str(msb) + " : " + v3Int2Str(lsb) + "]");
 			 }
 			 else if(BV_CONST == type){//OK
-				const V3BitVecX* const value = static_cast<V3BvNtk*>(_designNtk)->getInputConstValue(netid); assert (value);
+			//	const V3BitVecX* const value = static_cast<V3BvNtk*>(_designNtk)->getInputConstValue(netid); assert (value);
 			//	cout<<"to:"<<value->toExp()<<endl;
 			//	cout<<"reg:"<<value->regEx()<<endl;
-			 	assert(createBvConstGate(new_ntk,new_nid, v3Int2Str(value->size())+"'b"+value->regEx()));
-				name= v3Int2Str(value->size()) + "'b" + (netid.cp ? (~(*value)).regEx() : value->regEx());
+			// 	assert(createBvConstGate(new_ntk,new_nid, v3Int2Str(value->size())+"'b"+value->regEx()));
+			//	name= v3Int2Str(value->size()) + "'b" + (netid.cp ? (~(*value)).regEx() : value->regEx());
 			 }
 			 else if (AIG_NODE == type) {
 				const string name1 = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 0)); assert (name1.size());
@@ -196,7 +196,7 @@ SfMgr::traverseFanin(){
 			 else{
 				cout<<"UNKNOWN"<<V3GateTypeStr[type]<<endl;
 			 }
-   	cout<<netid.id<<" "<< (netid.cp ? "~" : "") + name<<endl;
+//   	cout<<netid.id<<" "<< (netid.cp ? "~" : "") + name<<endl;
   }
   for(uint32_t i=0,j=_designNtk->getOutputSize();i<j;++i){
       V3NetId outid=_designNtk->getOutput(i);
