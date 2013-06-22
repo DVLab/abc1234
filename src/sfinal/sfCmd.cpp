@@ -66,6 +66,9 @@ V3DebugCmd::exec(const string& option) {
   else if (v3StrNCmp("-lib", token, 3) == 0) {
 	 v3Handler.setCurHandlerFromId(sfMgr->getLibraryHandler());
   }
+  else if (v3StrNCmp("-merge", token, 3) == 0) {
+	 v3Handler.setCurHandlerFromId(sfMgr->getMergeHandler());
+  }
  else return V3CmdExec::errorOption(CMD_OPT_ILLEGAL, token);
 
    return CMD_EXEC_DONE;
@@ -87,9 +90,9 @@ V3DebugCmd::help() const {
 V3CmdExecStatus
 V3GoCmd::exec(const string& option) {
 	
-	sfMgr->traverseFanin();
+	sfMgr->createMergeNtk();
 
-
+	sfMgr->solveSat();
 
 
 

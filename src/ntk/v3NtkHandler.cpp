@@ -289,7 +289,7 @@ void
 V3NtkHandler::printNetlist() const {
    assert (_ntk); V3NetId id = V3NetId::makeNetId(1); V3GateType type;
    for (uint32_t i = 1; i < _ntk->getNetSize(); ++i, ++id.id) {
-      assert (i == id.id); Msg(MSG_IFO) <<"id: "<<id.id<< "[" << getNetNameOrFormedWithId(id) << "]";
+      assert (i == id.id); Msg(MSG_IFO) << "[" << getNetNameOrFormedWithId(id) << "]";
       type = _ntk->getGateType(id); Msg(MSG_IFO) << " = " << V3GateTypeStr[type];
       if (V3_FF == type || AIG_NODE == type || isV3PairType(type))
          Msg(MSG_IFO) << "(.A(" << getNetNameOrFormedWithId(_ntk->getInputNetId(id, 0)) << ")," 

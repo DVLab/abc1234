@@ -17,14 +17,20 @@
 #include "v3Type.h"
 #include "satMgr.h"
 #include "v3Msg.h"
+#include "v3SvrBoolector.h"
 using namespace std;
 
 using namespace std;
 class SfMgr{
 public:
 	void run(){};
+	void createMergeNtk();
 	void traverseFanin();
-    unsigned splitModule(const string&,vector<string>&); 
+	void solveSat();
+    unsigned splitModule(const string&,vector<string>&);
+	uint32_t getMergeHandler(){
+		return _mergeHandler;
+	}
 	uint32_t getDesignHandler(){
 		return _designHandler;
 	}
@@ -35,6 +41,10 @@ public:
 		_designHandler=id;
 		_designNtk=ntk;
 	}
+	void setMerge(uint32_t id,V3BvNtk* ntk){
+		_mergeHandler=id;
+		_mergeNtk=ntk;
+	}
 	void addLibrary(uint32_t id,V3BvNtk* ntk){
 		_libraryHandler.push_back(id);
 		_libraryNtk.push_back(ntk);
@@ -42,9 +52,18 @@ public:
 private:
 	uint32_t	_designHandler;
 	vector<uint32_t>	_libraryHandler;
+	uint32_t	_mergeHandler;
     V3BvNtk* _designNtk;
 	vector<V3BvNtk*> _libraryNtk;
+    V3BvNtk* _mergeNtk;
+	
+	  V3NetVec orderedNets;
+    V3SvrBoolector* _satSolver;
 //		uint32_t	_outHandler;
+
+
+  V3NetVec _satNets;
+
 };
 
 
