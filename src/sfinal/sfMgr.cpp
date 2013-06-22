@@ -39,6 +39,15 @@ extern const bool createBvConstGate(V3BvNtk* const, const V3NetId&, const string
 // General Hierarchical Ntk Construction Functions for V3 Ntk
 
 
+map<uint32_t,V3NetId> netidMap;
+
+V3NetId getNewNetId(V3NetId netid){
+	map<uint32_t,V3NetId>::iterator it=netidMap.find(netid.id);
+	assert(it!=netidMap.end());
+	return it->second;
+}
+
+
 void
 SfMgr::traverseFanin(){
   v3Handler.setCurHandlerFromId(_designHandler);
@@ -51,7 +60,7 @@ SfMgr::traverseFanin(){
   dfsNtkForGeneralOrder(_designNtk,orderedNets);
   assert (orderedNets.size() <= _designNtk->getNetSize());
 
-//   V3NtkInput* inputHandler = new V3NtkInput(false,"new_ntk");
+//  V3NtkInput* inputHandler = new V3NtkInput(false,"new_ntk");
 
 //  V3Ntk* new_ntk=new V3Ntk();
   
@@ -62,13 +71,18 @@ SfMgr::traverseFanin(){
  //  assert(createInput(new_ntk,new_nid));
    V3NtkHandler* curHandler= v3Handler.getCurHandler();
 
+
+  
+
   for(unsigned i=0;i<orderedNets.size();i++){
-		V3NetId& netid=	orderedNets[i];
+	   V3NetId  netid=	orderedNets[i];
 	   const V3GateType& type = _designNtk->getGateType(netid);
 	   string name =curHandler-> getNetName(netid);
 		cout<<"i:"<<netid.id<<" name:"<< name <<" type:"<<V3GateTypeStr[type]<<endl;
-
+		
 	   V3NetId new_nid=new_ntk->createNet( static_cast<V3BvNtk*>(_designNtk)->getNetWidth(netid));
+	  netidMap[netid.id]=new_nid;
+
 		cout<<"getGateType:"<<V3GateTypeStr[new_ntk->getGateType(new_nid)]<<endl;
 		   if (V3_MODULE == type) {
 			  Msg(MSG_WAR) << "Currently Expression Over Module Instances has NOT Been Implemented !!" << endl;
@@ -77,9 +91,12 @@ SfMgr::traverseFanin(){
 				const string name1 = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 0)); assert (name1.size());
 				const string name2 = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 1)); assert (name2.size());
 
-	   V3NetId new_nid0=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 0) ));
-	   V3NetId new_nid1=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 1) ));
-			assert(createBvPairGate(new_ntk,type, new_nid, new_nid0,new_nid1));
+			   V3NetId new_nid0=getNewNetId(_designNtk->getInputNetId(netid, 0));
+			   //=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 0) ));
+			   V3NetId new_nid1=getNewNetId(_designNtk->getInputNetId(netid, 1));
+			   //=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 1) ));
+			
+				assert(createBvPairGate(new_ntk,type, new_nid, new_nid0,new_nid1));
 				if (BV_MERGE == type) name = "{" + name1 + ", " + name2 + "}";
 				else {
 
@@ -102,7 +119,8 @@ SfMgr::traverseFanin(){
 			 else if (isV3ReducedType(type)) {//OK
 				const string name1 = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 0)); assert (name1.size());
 				
-	   V3NetId new_nid0=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 0) ));
+			   V3NetId new_nid0=getNewNetId(_designNtk->getInputNetId(netid, 0));
+			   //new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 0) ));
 				assert(createBvReducedGate(new_ntk,type, new_nid,new_nid0));
 				switch (type) {
 				   case BV_RED_AND :
@@ -123,15 +141,20 @@ SfMgr::traverseFanin(){
 				const string tName = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 1)); assert (tName.size());
 				const string sName = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 2)); assert (sName.size());
 			 	
-	   V3NetId new_nid0=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 0) ));
-	   V3NetId new_nid1=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 1) ));
-	   V3NetId new_nid2=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 2) ));
+			   V3NetId new_nid0=getNewNetId(_designNtk->getInputNetId(netid, 0));
+			   V3NetId new_nid1=getNewNetId(_designNtk->getInputNetId(netid, 1));
+			   V3NetId new_nid2=getNewNetId(_designNtk->getInputNetId(netid, 2));
+			   // V3NetId new_nid0=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 0) ));
+			   // V3NetId new_nid1=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 1) ));
+			   // V3NetId new_nid2=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 2) ));
 				assert(createBvMuxGate(new_ntk,new_nid, new_nid0,new_nid1,new_nid2));
 				name = "(" + sName + " ? " + tName + " : " + fName + ")";
 			 }
 			 else if (BV_SLICE == type) {//OK
 				const string name1 = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 0)); assert (name1.size());
-			   V3NetId new_nid0=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 0) ));
+
+			   V3NetId new_nid0=getNewNetId(_designNtk->getInputNetId(netid, 0));
+			   // V3NetId new_nid0=new_ntk->createNet(static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 0) ));
 				cout<<"width 1:"<<new_ntk->getNetWidth(new_nid)<<endl;
 	   			cout<<"width 2:"<<new_ntk->getNetWidth(new_nid0)<<endl;
 				cout<<"width 3:"<<static_cast<V3BvNtk*>(_designNtk)->getNetWidth(_designNtk->getInputNetId(netid, 0)) <<endl;
