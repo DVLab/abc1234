@@ -90,7 +90,7 @@ V3DebugCmd::help() const {
 V3CmdExecStatus
 V3GoCmd::exec(const string& option) {
 	
-	sfMgr->createMergeNtk();
+	sfMgr->traverseFanin();
 
 	sfMgr->solveSat();
 

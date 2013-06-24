@@ -41,10 +41,16 @@ extern const bool createBvConstGate(V3BvNtk* const, const V3NetId&, const string
 
 
 map<uint32_t,V3NetId> netidMap;
+map<uint32_t,V3NetId> o2rMap;
 
 V3NetId getNewNetId(V3NetId netid){
 	map<uint32_t,V3NetId>::iterator it=netidMap.find(netid.id);
 	assert(it!=netidMap.end());
+	return it->second;
+}
+V3NetId getRevisedNetId(V3NetId netid){
+	map<uint32_t,V3NetId>::iterator it=o2rMap.find(netid.id);
+	assert(it!=o2rMap.end());
 	return it->second;
 }
 
@@ -57,7 +63,7 @@ void SfMgr::solveSat(){
   for(uint32_t i=0; i<_satNets.size();i++){
 	  const V3NetId outid=_satNets[i];
 		static_cast<V3SvrBase*>(_satSolver)->addBoundedVerifyData(outid,z );
-		_satSolver->assumeProperty(outid, true, z);
+		_satSolver->assumeProperty(outid, false, z);
   }
 
     _satSolver->simplify();
@@ -170,6 +176,7 @@ SfMgr::createMergeNtk(){
 			_satNets.push_back(new_outid2);	
 	  }
   }
+  _mergeNtk=_designNtk;
   orderedNets.clear();
   orderedNets.reserve(_designNtk->getNetSize());
 //  targetNets.push_back(id);
@@ -221,14 +228,11 @@ SfMgr::createMergeNtk(){
 }
 
 void
-SfMgr::traverseFanin(){/*
-  v3Handler.setCurHandlerFromId(_designHandler);
- // V3NetId id = V3NetId::makeNetId(); //_designNtk->getOutput(0);
+SfMgr::traverseFanin(){
+v3Handler.setCurHandlerFromId(_designHandler);
   V3NetVec orderedNets;
-//  V3NetVec targetNets;
   orderedNets.clear();
   orderedNets.reserve(_designNtk->getNetSize());
-//  targetNets.push_back(id);
   dfsNtkForGeneralOrder(_designNtk,orderedNets);
   assert (orderedNets.size() <= _designNtk->getNetSize());
 
@@ -242,10 +246,20 @@ SfMgr::traverseFanin(){/*
 	   const V3GateType& type = _designNtk->getGateType(netid);
 	   string name =curHandler-> getNetNameOrFormedWithId(netid);
 		cout<<"i:"<<netid.id<<" name:"<< name <<" type:"<<V3GateTypeStr[type]<<endl;
-		
-	   V3NetId new_nid=inputHandler->createNet(name,static_cast<V3BvNtk*>(_designNtk)->getNetWidth(netid));
+
+	   V3NetId new_nid=inputHandler->createNet(name ,static_cast<V3BvNtk*>(_designNtk)->getNetWidth(netid));
 	   new_nid.cp = netid.cp;
-	  netidMap[netid.id]=new_nid;
+       V3NetId new_nidd;
+	   netidMap[netid.id]=new_nid;
+       if(BV_CONST==type) 
+           continue;
+       if(V3_PI!=type){
+    	   new_nidd=inputHandler->createNet(name+"Dupli" ,static_cast<V3BvNtk*>(_designNtk)->getNetWidth(netid));
+           new_nidd.cp = netid.cp;
+	       o2rMap[new_nid.id]=new_nidd;
+       }
+       else
+           o2rMap[new_nid.id]=new_nid;
 
 		cout<<"getGateType:"<<V3GateTypeStr[new_ntk->getGateType(new_nid)]<<endl;
 		   if (V3_MODULE == type) {
@@ -256,29 +270,40 @@ SfMgr::traverseFanin(){/*
 				const string name2 = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 1)); assert (name2.size());
 			   V3NetId new_nid0=getNewNetId(_designNtk->getInputNetId(netid, 0));
 			   V3NetId new_nid1=getNewNetId(_designNtk->getInputNetId(netid, 1));
+			   V3NetId new_nid2=getRevisedNetId(new_nid0);
+			   V3NetId new_nid3=getRevisedNetId(new_nid1);
 				assert(createBvPairGate(new_ntk,type, new_nid, new_nid0,new_nid1));
+				assert(createBvPairGate(new_ntk,type, new_nidd, new_nid2,new_nid3));
 			 }
 			 else if (isV3ReducedType(type)) {//OK
 				const string name1 = curHandler->getNetExpression(_designNtk->getInputNetId(netid, 0)); assert (name1.size());
-				
+
 			   V3NetId new_nid0=getNewNetId(_designNtk->getInputNetId(netid, 0));
+			   V3NetId new_nid1=getRevisedNetId(new_nid0);
 				assert(createBvReducedGate(new_ntk,type, new_nid,new_nid0));
+				assert(createBvReducedGate(new_ntk,type, new_nidd,new_nid1));
 			 }
 			 else if (BV_MUX == type) {//OK
 			   V3NetId new_nid0=getNewNetId(_designNtk->getInputNetId(netid, 0));
 			   V3NetId new_nid1=getNewNetId(_designNtk->getInputNetId(netid, 1));
 			   V3NetId new_nid2=getNewNetId(_designNtk->getInputNetId(netid, 2));
+			   V3NetId new_nid3=getRevisedNetId(new_nid0);
+			   V3NetId new_nid4=getRevisedNetId(new_nid1);
+			   V3NetId new_nid5=getRevisedNetId(new_nid2);
 				assert(createBvMuxGate(new_ntk,new_nid, new_nid0,new_nid1,new_nid2));
+				assert(createBvMuxGate(new_ntk,new_nidd, new_nid3,new_nid4,new_nid5));
 			 }
 			 else if (BV_SLICE == type) {//OK
 			   V3NetId new_nid0=getNewNetId(_designNtk->getInputNetId(netid, 0));
+			   V3NetId new_nid1=getRevisedNetId(new_nid0);
 				const uint32_t msb = static_cast<V3BvNtk*>(_designNtk)->getInputSliceBit(netid, true);
 				const uint32_t lsb = static_cast<V3BvNtk*>(_designNtk)->getInputSliceBit(netid, false);
 
 			 	assert(createBvSliceGate(new_ntk,new_nid, new_nid0, msb,lsb));
+			 	assert(createBvSliceGate(new_ntk,new_nidd, new_nid1, msb,lsb));
 			 }
 			 else if(BV_CONST == type){//OK
-			 
+
 			 }
 			 else if (AIG_NODE == type) {
 			 	assert(0);
@@ -291,6 +316,7 @@ SfMgr::traverseFanin(){/*
 			 }
 			 else if(V3_PIO==type){//OK
 				assert(createInout(new_ntk,new_nid));
+				assert(createInout(new_ntk,new_nidd));
 			 }
 			 else{
 				assert(0);
@@ -299,58 +325,22 @@ SfMgr::traverseFanin(){/*
   for(uint32_t i=0,j=_designNtk->getOutputSize();i<j;++i){
       V3NetId outid=_designNtk->getOutput(i);
       V3NetId new_outid=getNewNetId(outid);
-      new_ntk->createOutput(new_outid);
+      V3NetId new_outidd=getRevisedNetId(new_outid);
+      string name="miter"+i;
+	  V3NetId new_nid=inputHandler->createNet(name,static_cast<V3BvNtk*>(_designNtk)->getNetWidth(outid));
+      createBvPairGate(new_ntk,BV_XOR,new_nid,new_outid,new_outidd);
+      assert(createOutput(new_ntk,new_outid));
+      assert(createOutput(new_ntk,new_outidd));
+	  for(uint32_t k=0; k< static_cast<V3BvNtk*>(_designNtk)->getNetWidth(outid); k++){
+		  V3NetId new_outid2=inputHandler->createNet(name+"_new_out1_"+v3Int2Str(new_nid.id)+"_"+v3Int2Str(k),1);
+			assert(createBvSliceGate(new_ntk,new_outid2, new_nid, k ,k));
+			assert(createOutput(new_ntk,new_outid2));
+			_satNets.push_back(new_outid2);	
+	  }
   }
-  orderedNets.clear();
-  orderedNets.reserve(_designNtk->getNetSize());
-//  targetNets.push_back(id);
-  dfsNtkForGeneralOrder(_designNtk,orderedNets);
-  assert (orderedNets.size() <= _designNtk->getNetSize());
-  vector<string> strVec;
-  strVec.clear();
-	cout<<"*****ORIGINAL CIRCUIT*****"<<endl;
-	for(unsigned i=0;i<orderedNets.size();i++){
-		V3NetId netid=	orderedNets[i];
-		const V3GateType& type = _designNtk->getGateType(netid);
-	   string name =curHandler->getNetNameOrFormedWithId(netid);
-		//cout<<"i:"<<netid.id <<" name:"<< name << " type:"<<(netid.cp ? "~" : "")<< V3GateTypeStr[type]<<endl;
-		//cout<<"i:"<<netid.id <<" type:"<<(netid.cp ? "~" : "")<< V3GateTypeStr[type]<<endl;
-        string str=V3GateTypeStr[type]+(netid.cp?"~":"")+" name:"+name;
-        strVec.push_back(str);
-	}
-  sort(strVec.begin(),strVec.end());
-  for(unsigned i=0;i<strVec.size();++i)
-      cout<<i<<": "<<strVec[i]<<endl;
-  strVec.clear();
-  orderedNets.clear();
-  orderedNets.reserve(new_ntk->getNetSize());
-//  targetNets.push_back(id);
-  dfsNtkForGeneralOrder(new_ntk,orderedNets);
-  assert (orderedNets.size() <= new_ntk->getNetSize());
-  cout<<"*****NEW CIRCUIT*****"<<endl;
-  for(unsigned i=0;i<orderedNets.size();i++){
-		V3NetId netid=	orderedNets[i];
-		const V3GateType& type = new_ntk->getGateType(netid);
-	    string name ="";
-		static_cast<V3NtkHandler*>(inputHandler)->getNetName(netid);
-		//cout<<"i:"<<netid.id <<" name:"<< name << " type:"<<(netid.cp ? "~" : "")<< V3GateTypeStr[type]<<endl;
-		//cout<<"i:"<<netid.id <<" type:"<<(netid.cp ? "~" : "")<< V3GateTypeStr[type]<<endl;
-        string str=V3GateTypeStr[type]+(netid.cp?"~":"")+" name:"+name;
-        strVec.push_back(str);
-	}
-  sort(strVec.begin(),strVec.end());
-  for(unsigned i=0;i<strVec.size();++i)
-      cout<<i<<": "<<strVec[i]<<endl;
-  strVec.clear();
-
-        v3Handler.pushAndSetCurHandler(inputHandler);
-        V3BvNtk* ntk= new V3BvNtk();
-        *ntk = *((V3BvNtk*)inputHandler->getNtk());
-        setMerge(v3Handler.getCurHandlerId(),ntk);
-*/
-
+  _mergeNtk=new_ntk;
+  v3Handler.pushAndSetCurHandler(inputHandler);
 }
-
 
 unsigned SfMgr::splitModule(const string& fileName,vector<string>& moduleNames){
     cerr<<"split module\n";
