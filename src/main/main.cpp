@@ -64,7 +64,6 @@ int main(int argc, char** argv) {
          output = argv[i];
    }
 
-/*
    for (int i = 1; i < argc; ++i) {
       if (v3StrNCmp("-File", argv[i], 2) == 0) {
          if (dof) { Msg(MSG_ERR) << "Extra Argument \"" << argv[i] << "\" !!" << endl; usage(); }
@@ -73,8 +72,8 @@ int main(int argc, char** argv) {
       else if (dofON) { dofile = argv[i]; dofON = false; }
       else { Msg(MSG_ERR) << "Unknown Argument \"" << argv[i] << "\" !!" << endl; usage(); }
    }
-*/
-   v3CmdMgr->setFileName(design,lib,output);
+   
+   //v3CmdMgr->setFileName(design,lib,output);
    // Register Commands
    if (!(initAlgCmd() && initNtkCmd() && initVrfCmd() && initTransCmd() && initCommonCmd()
          && initBddCmd() && initProveCmd() && initSatCmd() && initSfCmd() )) { // MODIFICATION FOR SoCV BDD

@@ -238,7 +238,7 @@ V3CmdMgr::execOneCmd() {
       cout << getPrompt() << execCmd << endl;
       if (_dofile.eof()) closeDofile();
    }
-   else if(finaldone != 0){
+ /*  else if(finaldone != 0){
       string temp;
       if(finaldone == 3){
          temp = "read d "+_design;
@@ -252,7 +252,7 @@ V3CmdMgr::execOneCmd() {
       execCmd = const_cast<char *>(temp.c_str());
       cout << getPrompt() << execCmd << endl;
       finaldone -- ;
-   }
+   }*/
    else execCmd = readline(getPrompt().c_str());
    assert (execCmd);
 
