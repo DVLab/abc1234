@@ -81,6 +81,7 @@ void SfMgr::solveSat(){
 }
 void
 SfMgr::createMergeNtk(){
+/*
 	netidMap.clear();
   v3Handler.setCurHandlerFromId(_designHandler);
  // V3NetId id = V3NetId::makeNetId(); //_designNtk->getOutput(0);
@@ -99,7 +100,7 @@ SfMgr::createMergeNtk(){
 	   V3NetId  netid=	orderedNets[i];
 	   const V3GateType& type = _designNtk->getGateType(netid);
 	   string name =curHandler-> getNetNameOrFormedWithId(netid);
-		cout<<"i:"<<netid.id<<" name:"<< name <<" type:"<<V3GateTypeStr[type]<<endl;
+	//	cout<<"i:"<<netid.id<<" name:"<< name <<" type:"<<V3GateTypeStr[type]<<endl;
 			
 	   if(type!=BV_CONST){
 		V3NetId new_nid=curHandler->createNet(name+"_new_"+v3Int2Str(netid.id) ,static_cast<V3BvNtk*>(_designNtk)->getNetWidth(netid));
@@ -107,7 +108,7 @@ SfMgr::createMergeNtk(){
 	   new_nid.cp = netid.cp;
 	   netidMap[netid.id]=new_nid;
 
-		cout<<"getGateType:"<<V3GateTypeStr[_designNtk->getGateType(new_nid)]<<endl;
+	//	cout<<"getGateType:"<<V3GateTypeStr[_designNtk->getGateType(new_nid)]<<endl;
 		   if (V3_MODULE == type) {
 			  Msg(MSG_WAR) << "Currently Expression Over Module Instances has NOT Been Implemented !!" << endl;
 		   }
@@ -196,7 +197,7 @@ SfMgr::createMergeNtk(){
 	}
   sort(strVec.begin(),strVec.end());
   for(unsigned i=0;i<strVec.size();++i)
-      cout<<i<<": "<<strVec[i]<<endl;
+      cout<<i<<": "<<strVec[i]<<endl;*/
 /*  strVec.clear();
   orderedNets.clear();
   orderedNets.reserve(_designNtk->getNetSize());
@@ -224,7 +225,7 @@ SfMgr::createMergeNtk(){
         *ntk = *((V3BvNtk*)inputHandler->getNtk());
         setMerge(v3Handler.getCurHandlerId(),ntk);
 */
-	_mergeNtk=_designNtk;
+//	_mergeNtk=_designNtk;
 }
 
 void
@@ -239,13 +240,13 @@ v3Handler.setCurHandlerFromId(_designHandler);
   V3NtkInput* inputHandler = new V3NtkInput(false,"new_ntk");
 
 	V3BvNtk* new_ntk=(V3BvNtk*)( inputHandler->getNtk());
-   V3NtkHandler* curHandler= v3Handler.getCurHandler();
+   V3NtkInput* curHandler=(V3NtkInput*) v3Handler.getCurHandler();
 
   for(unsigned i=0;i<orderedNets.size();i++){
 	   V3NetId  netid=	orderedNets[i];
 	   const V3GateType& type = _designNtk->getGateType(netid);
 	   string name =curHandler-> getNetNameOrFormedWithId(netid);
-		cout<<"i:"<<netid.id<<" name:"<< name <<" type:"<<V3GateTypeStr[type]<<endl;
+	//	cout<<"i:"<<netid.id<<" name:"<< name <<" type:"<<V3GateTypeStr[type]<<endl;
 
 	   V3NetId new_nid=inputHandler->createNet(name ,static_cast<V3BvNtk*>(_designNtk)->getNetWidth(netid));
 	   new_nid.cp = netid.cp;
@@ -261,7 +262,7 @@ v3Handler.setCurHandlerFromId(_designHandler);
        else
            o2rMap[new_nid.id]=new_nid;
 
-		cout<<"getGateType:"<<V3GateTypeStr[new_ntk->getGateType(new_nid)]<<endl;
+	//	cout<<"getGateType:"<<V3GateTypeStr[new_ntk->getGateType(new_nid)]<<endl;
 		   if (V3_MODULE == type) {
 			  Msg(MSG_WAR) << "Currently Expression Over Module Instances has NOT Been Implemented !!" << endl;
 		   }
@@ -338,8 +339,19 @@ v3Handler.setCurHandlerFromId(_designHandler);
 			_satNets.push_back(new_outid2);	
 	  }
   }
-  _mergeNtk=new_ntk;
-  v3Handler.pushAndSetCurHandler(inputHandler);
+
+
+	V3StrVec outputName(new_ntk->getOutputSize(), "");
+	for (uint32_t i = 0; i < new_ntk->getOutputSize(); ++i){ 
+		  if (outputName[i].size()){
+		  	inputHandler->recordOutName(i, outputName[i]);
+		  }
+		  else{
+		    inputHandler->recordOutName(i, "output_" + v3Int2Str(i));
+		}
+	}
+  v3Handler.pushAndSetCurHandler(inputHandler); 
+  setMerge(v3Handler.getCurHandlerId(),new_ntk);
 }
 
 unsigned SfMgr::splitModule(const string& fileName,vector<string>& moduleNames){
