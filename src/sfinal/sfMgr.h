@@ -27,7 +27,8 @@ public:
 	void createMergeNtk();
 	void traverseFanin();
 	void solveSat();
-    unsigned splitModule(const string&,vector<string>&);
+	unsigned splitModule(const string&,vector<string>&);
+	void addNtk(uint32_t from_handler,uint32_t to_handler,V3BvNtk* ntk,map<uint32_t,V3NetId> IdMap);
 	uint32_t getMergeHandler(){
 		return _mergeHandler;
 	}
@@ -53,16 +54,16 @@ private:
 	uint32_t	_designHandler;
 	vector<uint32_t>	_libraryHandler;
 	uint32_t	_mergeHandler;
-    V3BvNtk* _designNtk;
+	V3BvNtk* _designNtk;
 	vector<V3BvNtk*> _libraryNtk;
-    V3BvNtk* _mergeNtk;
-	
-	  V3NetVec orderedNets;
-    V3SvrBoolector* _satSolver;
+	V3BvNtk* _mergeNtk;
+	V3BvNtk* _consNtk;
+	V3NetVec orderedNets;
+	V3SvrBoolector* _satSolver;
 //		uint32_t	_outHandler;
 
 
-  V3NetVec _satNets;
+	V3NetVec _satNets;
 
 };
 
