@@ -415,7 +415,7 @@ void SfMgr::testAddNtk(){
   V3NetId new_nid = inputHandler->createNet("test2",1);
   createInput(test_ntk, new_nid0);
   createInput(test_ntk, new_nid1);
-  createBvPairGate(test_ntk, BV_AND, new_nid, new_nid0, new_nid1);
+  createBvPairGate(test_ntk, BV_AND, new_nid, new_nid0, new_nid1)); //?
   v3Handler.pushAndSetCurHandler(inputHandler);
   uint32_t _testHandler = v3Handler.getCurHandlerId();
   setMerge(_testHandler,test_ntk);

@@ -94,7 +94,7 @@ V3GoCmd::exec(const string& option) {
 
 	sfMgr->solveSat();
 	
-	sfMgr->testAddNtk();
+	sfMgr->testAddNtk()
 
 
 	return CMD_EXEC_DONE;

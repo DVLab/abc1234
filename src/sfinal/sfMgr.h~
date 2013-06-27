@@ -27,7 +27,6 @@ public:
 	void createMergeNtk();
 	void traverseFanin();
 	void solveSat();
-	void testAddNtk();
 	unsigned splitModule(const string&,vector<string>&);
 	void addNtk(uint32_t from_handler,uint32_t to_handler,V3BvNtk* ntk,map<uint32_t,V3NetId> IdMap);
 	uint32_t getMergeHandler(){
