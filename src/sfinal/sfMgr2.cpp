@@ -75,12 +75,12 @@ V3NetId getMapNetId3(V3NetId netid , std::map<uint32_t,V3NetId>& IdMap ){
 void SfMgr::solveSat2(){
 	bool unsat=false;
 
-//	for(uint32_t b1=0; b1<=1;b1++){
-//	for(uint32_t b2=0; b2<=1;b2++){
-//	for(uint32_t b3=0; b3<=1;b3++){
-//	for(uint32_t b4=0; b4<=1;b4++){
-//	for(uint32_t b5=0; b5<=1;b5++){
-		//if(!unsat){continue;}
+	for(uint32_t b1=0; b1<=1;b1++){
+	for(uint32_t b2=0; b2<=1;b2++){
+	for(uint32_t b3=0; b3<=1;b3++){
+	for(uint32_t b4=0; b4<=1;b4++){
+	for(uint32_t b5=0; b5<=1;b5++){
+		if(unsat){continue;}
   _satSolver = new V3SvrBoolector(_mergeNtk);
 
   uint32_t z=0;
@@ -91,24 +91,25 @@ void SfMgr::solveSat2(){
 		_satSolver->assumeProperty(outid, false, z);
   }
 	
-//		_satSolver->assumeProperty(_inputVarNet[0],false , z);
-//		_satSolver->assumeProperty(_inputVarNet[1],true , z);
-//		_satSolver->assumeProperty(_inputVarNet[2],true , z);
-//		_satSolver->assumeProperty(_inputVarNet[3],false , z);
-//		_satSolver->assumeProperty(_inputVarNet[4],false , z);
+		_satSolver->assumeProperty(_inputVarNet[0],bool(b1) , z);
+		_satSolver->assumeProperty(_inputVarNet[1],bool(b2) , z);
+		_satSolver->assumeProperty(_inputVarNet[2],bool(b3) , z);
+		_satSolver->assumeProperty(_inputVarNet[3],bool(b4) , z);
+		_satSolver->assumeProperty(_inputVarNet[4],bool(b5) , z);
 	
 
+		cout<<(bool)b5<<(bool)b4<<(bool)b3<<(bool)b2<<(bool)b1<<endl;
     _satSolver->simplify();
 	unsat=!_satSolver->assump_solve(); 
 //	cout<<(_satSolver->assump_solve() ? "SAT" : "UNSAT")<<endl;
 	if(unsat){
-//		cout<<"UNSAT,sol:"<<b5<<b4<<b3<<b2<<b1<<endl;
+		cout<<"UNSAT,sol:"<<(bool)b5<<(bool)b4<<(bool)b3<<(bool)b2<<(bool)b1<<endl;
 		cout<<"UNSAT"<<endl;
 		unsat=true;
-//		break;
+		break;
 	}
 
-//	}}}}}
+	}}}}}
 	if(!unsat){
 		cout<<"no solution"<<endl;
 
@@ -207,13 +208,13 @@ void SfMgr::testAddNtk2(){
   assert(createBvPairGate( test_ntk  ,  BV_MERGE, input_1 ,  m_input_0, test_ntk->getInput(0)));
   assert(createBvPairGate( test_ntk  , BV_MERGE , input_const_0 ,  m_input_4, m_input_3 ));
   assert(createBvPairGate( test_ntk  , BV_MERGE , input_const_1 ,  m_input_2, m_input_1 ));
-
- assert(createBvConstGate( test_ntk , m_input_0,"1'b0" ));   
+/*
+ assert(createBvConstGate( test_ntk , m_input_0,"1'b0"));   
  assert(createBvConstGate( test_ntk , m_input_1,"1'b1"));   
  assert(createBvConstGate( test_ntk , m_input_2,"1'b1"));   
  assert(createBvConstGate( test_ntk , m_input_3,"1'b0"));   
  assert(createBvConstGate( test_ntk , m_input_4,"1'b0"));   
-
+*/
   assert(createV3BufGate( test_ntk , getMapNetId3(V3NetId::makeNetId(2),library_2_Map),input_1)); 
   assert(createV3BufGate( test_ntk , getMapNetId3(V3NetId::makeNetId(1),library_2_Map),input_2));
 
