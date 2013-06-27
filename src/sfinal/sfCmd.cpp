@@ -90,12 +90,12 @@ V3DebugCmd::help() const {
 V3CmdExecStatus
 V3GoCmd::exec(const string& option) {
 	
-	sfMgr->traverseFanin();
+//	sfMgr->traverseFanin();
+
+	
+	sfMgr->testAddNtk2();
 
 	sfMgr->solveSat();
-	
-	sfMgr->testAddNtk();
-
 
 	return CMD_EXEC_DONE;
 }

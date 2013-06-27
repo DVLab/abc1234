@@ -82,7 +82,6 @@ void SfMgr::solveSat(){
         Msg(MSG_IFO) << dataValue[0];
       } else Msg(MSG_IFO) << 'x';
     }
-
 }
 void
 SfMgr::createMergeNtk(){
@@ -235,6 +234,7 @@ SfMgr::createMergeNtk(){
 
 void
 SfMgr::traverseFanin(){
+/*
   v3Handler.setCurHandlerFromId(_designHandler);
   V3NetVec orderedNets;
   orderedNets.clear();
@@ -404,11 +404,11 @@ SfMgr::traverseFanin(){
 		  }
   	}
   v3Handler.pushAndSetCurHandler(inputHandler); 
-  setMerge(v3Handler.getCurHandlerId(),new_ntk);
+  setMerge(v3Handler.getCurHandlerId(),new_ntk);*/
 }
 
 void SfMgr::testAddNtk(){
-  V3NtkInput* inputHandler = new V3NtkInput(false,"test_ntk");
+/*  V3NtkInput* inputHandler = new V3NtkInput(false,"test_ntk");
   V3BvNtk* test_ntk=(V3BvNtk*)( inputHandler->getNtk());
   V3NetId new_nid0 = inputHandler->createNet("test0",1);
   V3NetId new_nid1 = inputHandler->createNet("test1",1);
@@ -419,106 +419,12 @@ void SfMgr::testAddNtk(){
   v3Handler.pushAndSetCurHandler(inputHandler);
   uint32_t _testHandler = v3Handler.getCurHandlerId();
   setMerge(_testHandler,test_ntk);
-  map<uint32_t,V3NetId> IdMap;
-  addNtk(_testHandler,_designHandler,test_ntk,IdMap);
+  map<uint32_t,V3NetId> design_1_Map;
+  addNtk2(_designHandler,_testHandler,design_1_Map); */
+
 }
 
-void SfMgr::addNtk(uint32_t from_handler,uint32_t to_handler,V3BvNtk* ntk,map<uint32_t,V3NetId> IdMap){
-   V3NetVec orderedNets;
-   orderedNets.clear();
-   orderedNets.reserve(ntk->getNetSize());
-   dfsNtkForGeneralOrder(ntk,orderedNets);
-   assert (orderedNets.size() <= ntk->getNetSize());
-
-   V3NtkInput* fromHandler = (V3NtkInput*)v3Handler.getHandler(from_handler);
-   V3NtkInput* toHandler   = (V3NtkInput*)v3Handler.getHandler(to_handler);
-   V3BvNtk* new_ntk = (V3BvNtk*)(toHandler->getNtk());
-
-   for(unsigned i = 0 ; i < orderedNets.size() ; ++i){
-      V3NetId netid = orderedNets[i];
-      const V3GateType& type = ntk->getGateType(netid);
-      string name = fromHandler->getNetNameOrFormedWithId(netid);
-      V3NetId new_nid = toHandler->createNet(name ,static_cast<V3BvNtk*>(ntk)->getNetWidth(netid));
-      new_nid.cp = netid.cp;
-      IdMap[netid.id]=new_nid; // ???
-
-      if(BV_CONST==type) 
-         continue;
-      if (V3_MODULE == type) {
-         Msg(MSG_WAR) << "Currently Expression Over Module Instances has NOT Been Implemented !!" << endl;
-      }
-      if (isV3PairType(type)) {
-         V3NetId old_nid0 = ntk->getInputNetId(netid, 0);
-         V3NetId old_nid1 = ntk->getInputNetId(netid, 1);
-         V3NetId new_nid0 = getMapNetId(old_nid0,IdMap);
-         V3NetId new_nid1 = getMapNetId(old_nid1,IdMap);
-         new_nid0.cp = old_nid0.cp;
-         new_nid1.cp = old_nid1.cp;
-         assert(createBvPairGate(new_ntk, type, new_nid, new_nid0, new_nid1));
-      }
-      else if (isV3ReducedType(type)) {
-         V3NetId old_nid0 = ntk->getInputNetId(netid, 0);
-         V3NetId new_nid0 = getMapNetId(old_nid0,IdMap);
-         new_nid0.cp = old_nid0.cp;
-         assert(createBvReducedGate(new_ntk, type, new_nid, new_nid0));
-      }
-      else if (BV_MUX == type) {
-         V3NetId old_nid0 = ntk->getInputNetId(netid, 0);
-         V3NetId old_nid1 = ntk->getInputNetId(netid, 1);
-         V3NetId old_nid2 = ntk->getInputNetId(netid, 2);
-         V3NetId new_nid0 = getMapNetId(old_nid0,IdMap);
-         V3NetId new_nid1 = getMapNetId(old_nid1,IdMap);
-         V3NetId new_nid2 = getMapNetId(old_nid2,IdMap);
-         new_nid0.cp = old_nid0.cp;
-         new_nid1.cp = old_nid1.cp;
-         new_nid2.cp = old_nid2.cp;
-         assert(createBvMuxGate(new_ntk, new_nid, new_nid0, new_nid1, new_nid2));
-      }
-      else if (BV_SLICE == type) {
-         V3NetId old_nid0 = ntk->getInputNetId(netid, 0);
-         V3NetId new_nid0 = getMapNetId(old_nid0,IdMap);
-         new_nid0.cp = old_nid0.cp;
-         const uint32_t msb = static_cast<V3BvNtk*>(ntk)->getInputSliceBit(netid, true);
-         const uint32_t lsb = static_cast<V3BvNtk*>(ntk)->getInputSliceBit(netid, false);
-         assert(createBvSliceGate(new_ntk, new_nid, new_nid0, msb,lsb));
-      }
-      else if(BV_CONST == type){
-      }
-      else if (AIG_NODE == type) {
-         assert(0);
-      }
-      else if(AIG_FALSE == type){
-         assert(0);
-      }
-      else if(V3_PI ==type){
-         assert(createInput(new_ntk, new_nid));
-      }
-      else if(V3_PIO==type){
-         assert(createInout(new_ntk, new_nid));
-      }
-      else{
-         assert(0);
-      }
-   }
-   for(uint32_t i = 0 , j = ntk->getOutputSize() ; i < j ; ++i){
-      V3NetId outid = ntk->getOutput(i);
-      V3NetId new_outid = getMapNetId(outid,IdMap);
-      new_outid.cp = outid.cp;
-      assert(createOutput(new_ntk, new_outid));
-   }
-
-   V3StrVec outputName(new_ntk->getOutputSize(), "");
-   for (uint32_t i = 0; i < new_ntk->getOutputSize(); ++i){ 
-      if (outputName[i].size()){
-         toHandler->recordOutName(i, outputName[i]);
-      }
-      else{
-         toHandler->recordOutName(i, "output_" + v3Int2Str(i));
-      }
-   }
-}
-
-void replaceLib(uint32_t lib_handler,uint32_t origin_handler,map<uint32_t,V3NetId> rid,map<uint32_t,V3NetId> replaceMap,map<uint32_t,V3NetId> IdMap){
+void replaceLib2(uint32_t lib_handler,uint32_t origin_handler,map<uint32_t,V3NetId> rid,map<uint32_t,V3NetId> replaceMap,map<uint32_t,V3NetId> IdMap){
 // lib_handler.....Macro's Handler
 // origin_handler..Origin's Handler
 // rid.............will be replaced netid

@@ -27,10 +27,12 @@ public:
 	void createMergeNtk();
 	void traverseFanin();
 	void solveSat();
+
 	void testAddNtk();
+	void testAddNtk2();
 	unsigned splitModule(const string&,vector<string>&);
-	void addNtk(uint32_t from_handler,uint32_t to_handler,V3BvNtk* ntk,map<uint32_t,V3NetId> IdMap);
-	void replaceLib(uint32_t lib_handler,uint32_t origin_handler,map<uint32_t,V3NetId> rid,map<uint32_t,V3NetId> replaceMap,map<uint32_t,V3NetId> IdMap);
+	void addNtk2(uint32_t from_handler,uint32_t to_handler,map<uint32_t,V3NetId>& IdMap,uint32_t nid,map<uint32_t,bool>& block_list ,bool add_in=true, bool add_out=true);
+	void replaceLib2(uint32_t lib_handler,uint32_t origin_handler,map<uint32_t,V3NetId> rid,map<uint32_t,V3NetId> replaceMap,map<uint32_t,V3NetId> IdMap);
 	uint32_t getMergeHandler(){
 		return _mergeHandler;
 	}
