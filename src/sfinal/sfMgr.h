@@ -27,9 +27,12 @@ public:
 	void createMergeNtk();
 	void traverseFanin();
 	void solveSat();
+	void solveSat2();
 
 	void testAddNtk();
 	void testAddNtk2();
+	void testAddNtk3();
+
 	unsigned splitModule(const string&,vector<string>&);
 	void addNtk2(uint32_t from_handler,uint32_t to_handler,map<uint32_t,V3NetId>& IdMap,uint32_t nid,map<uint32_t,bool>& block_list ,bool add_in=true, bool add_out=true);
 	void replaceLib2(uint32_t lib_handler,uint32_t origin_handler,map<uint32_t,V3NetId> rid,map<uint32_t,V3NetId> replaceMap,map<uint32_t,V3NetId> IdMap);
@@ -68,7 +71,7 @@ private:
 
 
 	V3NetVec _satNets;
-
+	V3NetVec _inputVarNet;
 };
 
 

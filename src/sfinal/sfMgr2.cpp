@@ -12,6 +12,7 @@
 #include "v3Msg.h"
 #include "v3StrUtil.h"
 #include<algorithm>
+#include<math.h>
 using namespace std;
 
 extern const bool v3Str2Int(const string&, int&);
@@ -71,6 +72,74 @@ V3NetId getMapNetId3(V3NetId netid , std::map<uint32_t,V3NetId>& IdMap ){
    return it->second;
 }
 
+void SfMgr::solveSat2(){
+	bool unsat=false;
+
+//	for(uint32_t b1=0; b1<=1;b1++){
+//	for(uint32_t b2=0; b2<=1;b2++){
+//	for(uint32_t b3=0; b3<=1;b3++){
+//	for(uint32_t b4=0; b4<=1;b4++){
+//	for(uint32_t b5=0; b5<=1;b5++){
+		//if(!unsat){continue;}
+  _satSolver = new V3SvrBoolector(_mergeNtk);
+
+  uint32_t z=0;
+
+  for(uint32_t i=0; i<_satNets.size();i++){
+	  const V3NetId outid=_satNets[i];
+		static_cast<V3SvrBase*>(_satSolver)->addBoundedVerifyData(outid,z );
+		_satSolver->assumeProperty(outid, false, z);
+  }
+	
+//		_satSolver->assumeProperty(_inputVarNet[0],false , z);
+//		_satSolver->assumeProperty(_inputVarNet[1],true , z);
+//		_satSolver->assumeProperty(_inputVarNet[2],true , z);
+//		_satSolver->assumeProperty(_inputVarNet[3],false , z);
+//		_satSolver->assumeProperty(_inputVarNet[4],false , z);
+	
+
+    _satSolver->simplify();
+	unsat=!_satSolver->assump_solve(); 
+//	cout<<(_satSolver->assump_solve() ? "SAT" : "UNSAT")<<endl;
+	if(unsat){
+//		cout<<"UNSAT,sol:"<<b5<<b4<<b3<<b2<<b1<<endl;
+		cout<<"UNSAT"<<endl;
+		unsat=true;
+//		break;
+	}
+
+//	}}}}}
+	if(!unsat){
+		cout<<"no solution"<<endl;
+
+	}
+	/*
+  V3BitVecX dataValue;
+    for (int j = _mergeNtk->getOutputSize()-1; j >= 0; --j) {
+      if (_satSolver->existVerifyData(_mergeNtk->getOutput(j), z)) {
+        dataValue = _satSolver->getDataValue(_mergeNtk->getOutput(j), z);
+        assert (dataValue.size() == _mergeNtk->getNetWidth(_mergeNtk->getOutput(j)));
+        Msg(MSG_IFO) << dataValue[0];
+      } else Msg(MSG_IFO) << 'x';
+    }*/
+}
+
+void SfMgr::testAddNtk3(){
+
+  V3NtkInput* inputHandler = new V3NtkInput(false,"test_ntk");
+  V3BvNtk* test_ntk=(V3BvNtk*)( inputHandler->getNtk());
+  v3Handler.pushAndSetCurHandler(inputHandler);
+  uint32_t _testHandler = v3Handler.getCurHandlerId();
+
+  map<uint32_t,V3NetId> design_1_Map;
+  map<uint32_t,V3NetId> design_2_Map;
+  map<uint32_t,bool> block_list;
+
+  addNtk2(_designHandler,_testHandler,design_1_Map,0,block_list,true,true);
+  addNtk2(_designHandler,_testHandler,design_2_Map,2,block_list,true,true);
+
+  setMerge(_testHandler,test_ntk);
+}
 
    
 void SfMgr::testAddNtk2(){
@@ -117,11 +186,33 @@ void SfMgr::testAddNtk2(){
   V3NetId input_const_0=inputHandler->createNet("TEMP_CONST_0",2);
   V3NetId input_const_1=inputHandler->createNet("TEMP_CONST_1",2);
 
+	V3NetId m_input_0=inputHandler->createNet("TEMP_MINPUT_0",1);
+	V3NetId m_input_1=inputHandler->createNet("TEMP_MINPUT_1",1);
+	V3NetId m_input_2=inputHandler->createNet("TEMP_MINPUT_2",1);
+	V3NetId m_input_3=inputHandler->createNet("TEMP_MINPUT_3",1);
+	V3NetId m_input_4=inputHandler->createNet("TEMP_MINPUT_4",1);
+	_inputVarNet.push_back(m_input_0);
+	_inputVarNet.push_back(m_input_1);
+	_inputVarNet.push_back(m_input_2);
+	_inputVarNet.push_back(m_input_3);
+	_inputVarNet.push_back(m_input_4);
 
-  assert(createBvPairGate( test_ntk  ,  BV_MERGE, input_1, test_ntk->getInput(0), V3NetId::makeNetId(0) ));
-  assert(createBvPairGate( test_ntk  ,  BV_MERGE, input_2,   input_const_1  ,input_const_0  ));
-  assert(createBvPairGate( test_ntk  , BV_MERGE , input_const_0 ,  V3NetId::makeNetId(0), V3NetId::makeNetId(0) ));
-  assert(createBvPairGate( test_ntk  ,  BV_MERGE, input_const_1 ,  ~V3NetId::makeNetId(0), ~V3NetId::makeNetId(0) ));
+	cout<<"minput_id:"<<m_input_1.id<<" "<<m_input_2.id<<" "<<m_input_3.id<<" "<<m_input_4.id<<" "<<endl;
+
+//  assert(createBvPairGate( test_ntk  ,  BV_MERGE, input_1 ,  V3NetId::makeNetId(0), test_ntk->getInput(0)));
+  assert(createBvPairGate( test_ntk  ,  BV_MERGE, input_2   ,   input_const_0,input_const_1 ));
+//  assert(createBvPairGate( test_ntk  , BV_MERGE , input_const_0 ,  V3NetId::makeNetId(0), V3NetId::makeNetId(0) ));
+//  assert(createBvPairGate( test_ntk  ,  BV_MERGE, input_const_1 ,  V3NetId::makeNetId(0,1), V3NetId::makeNetId(0,1) ));
+
+  assert(createBvPairGate( test_ntk  ,  BV_MERGE, input_1 ,  m_input_0, test_ntk->getInput(0)));
+  assert(createBvPairGate( test_ntk  , BV_MERGE , input_const_0 ,  m_input_4, m_input_3 ));
+  assert(createBvPairGate( test_ntk  , BV_MERGE , input_const_1 ,  m_input_2, m_input_1 ));
+
+ assert(createBvConstGate( test_ntk , m_input_0,"1'b0" ));   
+ assert(createBvConstGate( test_ntk , m_input_1,"1'b1"));   
+ assert(createBvConstGate( test_ntk , m_input_2,"1'b1"));   
+ assert(createBvConstGate( test_ntk , m_input_3,"1'b0"));   
+ assert(createBvConstGate( test_ntk , m_input_4,"1'b0"));   
 
   assert(createV3BufGate( test_ntk , getMapNetId3(V3NetId::makeNetId(2),library_2_Map),input_1)); 
   assert(createV3BufGate( test_ntk , getMapNetId3(V3NetId::makeNetId(1),library_2_Map),input_2));
@@ -130,10 +221,10 @@ void SfMgr::testAddNtk2(){
 											getMapNetId3(V3NetId::makeNetId(3),library_2_Map) , 0,0));
 		assert(createBvSliceGate(test_ntk,   getMapNetId3(V3NetId::makeNetId(24),design_2_Map) ,
 											getMapNetId3(V3NetId::makeNetId(3),library_2_Map) , 1,1));
-		assert(createBvSliceGate(test_ntk,  ~getMapNetId3(V3NetId::makeNetId(18),design_2_Map) ,
-											getMapNetId3(V3NetId::makeNetId(3),library_2_Map) , 2,2));
-		assert(createBvSliceGate(test_ntk,  ~getMapNetId3(V3NetId::makeNetId(17),design_2_Map) ,
-											getMapNetId3(V3NetId::makeNetId(3),library_2_Map) , 3,3));
+		assert(createBvSliceGate(test_ntk,  getMapNetId3(V3NetId::makeNetId(18),design_2_Map) ,
+											~getMapNetId3(V3NetId::makeNetId(3),library_2_Map) , 2,2));
+		assert(createBvSliceGate(test_ntk,  getMapNetId3(V3NetId::makeNetId(17),design_2_Map) ,
+											~getMapNetId3(V3NetId::makeNetId(3),library_2_Map) , 3,3));
 
 
 	cout<<"****insert_input****"<<endl;
@@ -176,6 +267,15 @@ void SfMgr::testAddNtk2(){
 		  }
   	}
 
+	//CREATE INPUT FOR RTL
+	/*
+			assert(createInput(test_ntk,m_input_0));
+			assert(createInput(test_ntk,m_input_1));
+			assert(createInput(test_ntk,m_input_2));
+			assert(createInput(test_ntk,m_input_3));
+			assert(createInput(test_ntk,m_input_4));
+*/
+	//END CREATE INPUT
 
   setMerge(_testHandler,test_ntk);
 }
