@@ -30,6 +30,7 @@ public:
 	void testAddNtk();
 	unsigned splitModule(const string&,vector<string>&);
 	void addNtk(uint32_t from_handler,uint32_t to_handler,V3BvNtk* ntk,map<uint32_t,V3NetId> IdMap);
+	void replaceLib(uint32_t lib_handler,uint32_t origin_handler,map<uint32_t,V3NetId> rid,map<uint32_t,V3NetId> replaceMap,map<uint32_t,V3NetId> IdMap);
 	uint32_t getMergeHandler(){
 		return _mergeHandler;
 	}

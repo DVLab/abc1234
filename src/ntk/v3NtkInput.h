@@ -29,6 +29,7 @@ class V3NtkInput : public V3NtkHandler
       const string getInoutName(const uint32_t&) const;
       // Net Ancestry Functions
       void getNetName(V3NetId&, string&) const;
+      void getNetName_2(V3NetId&, string&) const;
       // Ntk Input Naming Functions
       inline const bool existNet(const string& s) const { return V3NetUD != getNetId(s); }
       const bool resetNetName(const uint32_t&, const string&);

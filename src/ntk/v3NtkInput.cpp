@@ -53,6 +53,14 @@ V3NtkInput::getNetName(V3NetId& id, string& name) const {
    name = (it == _netHash.end()) ? "" : it->second;
 }
 
+void
+V3NtkInput::getNetName_2(V3NetId& id, string& name) const {
+   if (V3NetUD == id ) { assert (!name.size()); return; }
+   V3NetStrHash::const_iterator it = _netHash.find(id.id);
+   name = (it == _netHash.end()) ? "" : it->second;
+}
+
+
 // Ntk Input Naming Functions
 const bool
 V3NtkInput::resetNetName(const uint32_t& index, const string& name) {

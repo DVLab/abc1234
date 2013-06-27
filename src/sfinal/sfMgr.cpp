@@ -518,6 +518,107 @@ void SfMgr::addNtk(uint32_t from_handler,uint32_t to_handler,V3BvNtk* ntk,map<ui
    }
 }
 
+void replaceLib(uint32_t lib_handler,uint32_t origin_handler,map<uint32_t,V3NetId> rid,map<uint32_t,V3NetId> replaceMap,map<uint32_t,V3NetId> IdMap){
+// lib_handler.....Macro's Handler
+// origin_handler..Origin's Handler
+// rid.............will be replaced netid
+// replaceMap......will be replaced netid's Map to which Macro' net
+// IdMap...........Map for Origin netid & New netid
+   V3NtkInput* libHandler = (V3NtkInput*) v3Handler.getHandler(lib_handler);
+   V3NtkInput* originHandler = (V3NtkInput*) v3Handler.getHandler(origin_handler);
+   V3NtkInput* replaceHandler = new V3NtkInput(false,"replaced_ntk");
+
+   V3BvNtk* originNtk  = (V3BvNtk*)(originHandler->getNtk());
+   V3BvNtk* libNtk     = (V3BvNtk*)(libHandler->getNtk());
+   V3BvNtk* replaceNtk = (V3BvNtk*)(replaceHandler->getNtk());
+
+   V3NetVec orderedNets;
+   orderedNets.clear();
+   orderedNets.reserve(originNtk->getNetSize());
+   dfsNtkForGeneralOrder(originNtk,orderedNets);
+   assert(orderedNets.size() <= originNtk->getNetSize());
+
+   for(unsigned i = 0 ; i < orderedNets.size() ; ++i){
+      V3NetId originId = orderedNets[i];
+      bool to_construct = true;
+      map<uint32_t,V3NetId>::iterator it = rid.find(originId.id);
+      if(it != rid.end()){
+         V3NetId r = it->second;
+         const V3GateType& r_type = libNtk->getGateType(r);
+         if(r_type != V3_PI)
+            to_construct = false;
+      }
+
+      const V3GateType& type = originNtk->getGateType(originId);
+      if(to_construct){
+         string name = originHandler->getNetNameOrFormedWithId(originId);
+         V3NetId new_nid = replaceHandler->createNet(name ,static_cast<V3BvNtk*>(originNtk)->getNetWidth(originId));
+         new_nid.cp = originId.cp;
+         IdMap[originId.id] = new_nid;
+
+         if(BV_CONST == type)
+            continue;
+         if (V3_MODULE == type) {
+            Msg(MSG_WAR) << "Currently Expression Over Module Instances has NOT Been Implemented !!" << endl;
+         }
+         if(isV3PairType(type)){
+            V3NetId old_nid0 = originNtk->getInputNetId(originId, 0);
+            V3NetId old_nid1 = originNtk->getInputNetId(originId, 1);
+            V3NetId new_nid0 = getMapNetId(old_nid0,IdMap);
+            V3NetId new_nid1 = getMapNetId(old_nid1,IdMap);
+            new_nid0.cp = old_nid0.cp;
+            new_nid1.cp = old_nid1.cp;
+            assert(createBvPairGate(replaceNtk, type, new_nid, new_nid0, new_nid1));
+         }
+         else if (isV3ReducedType(type)) {
+            V3NetId old_nid0 = originNtk->getInputNetId(originId, 0);
+            V3NetId new_nid0 = getMapNetId(old_nid0,IdMap);
+            new_nid0.cp = old_nid0.cp;
+            assert(createBvReducedGate(replaceNtk, type, new_nid, new_nid0));
+         }
+         else if (BV_MUX == type) {
+            V3NetId old_nid0 = originNtk->getInputNetId(originId, 0);
+            V3NetId old_nid1 = originNtk->getInputNetId(originId, 1);
+            V3NetId old_nid2 = originNtk->getInputNetId(originId, 2);
+            V3NetId new_nid0 = getMapNetId(old_nid0,IdMap);
+            V3NetId new_nid1 = getMapNetId(old_nid1,IdMap);
+            V3NetId new_nid2 = getMapNetId(old_nid2,IdMap);
+            new_nid0.cp = old_nid0.cp;
+            new_nid1.cp = old_nid1.cp;
+            new_nid2.cp = old_nid2.cp;
+            assert(createBvMuxGate(replaceNtk, new_nid, new_nid0, new_nid1, new_nid2));
+         }
+         else if (BV_SLICE == type) {
+            V3NetId old_nid0 = originNtk->getInputNetId(originId, 0);
+            V3NetId new_nid0 = getMapNetId(old_nid0,IdMap);
+            new_nid0.cp = old_nid0.cp;
+            const uint32_t msb = static_cast<V3BvNtk*>(originNtk)->getInputSliceBit(originId, true);
+            const uint32_t lsb = static_cast<V3BvNtk*>(originNtk)->getInputSliceBit(originId, false);
+            assert(createBvSliceGate(replaceNtk, new_nid, new_nid0, msb,lsb));
+         }
+         else if(BV_CONST == type){
+         }
+         else if (AIG_NODE == type) {
+            assert(0);
+         }
+         else if(AIG_FALSE == type){
+            assert(0);
+         }
+         else if(V3_PI ==type){
+            assert(createInput(replaceNtk, new_nid));
+         }
+         else if(V3_PIO==type){
+            assert(createInout(replaceNtk, new_nid));
+         }
+         else{
+            assert(0);
+         }
+      }
+      else{}
+   }
+}
+
+
 unsigned SfMgr::splitModule(const string& fileName,vector<string>& moduleNames){
     cerr<<"split module\n";
     ifstream ifile(fileName.c_str());
