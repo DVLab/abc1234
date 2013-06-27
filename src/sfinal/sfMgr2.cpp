@@ -61,7 +61,7 @@ V3NetId getMapNetId2(V3NtkInput* fromHandler,V3NtkInput* toHandler, V3NetId neti
       new_nid.cp = netid.cp;
       IdMap[netid.id]=new_nid; // ???
 	}
-	cout<<"old_id"<<netid.id<<"new_id:"<<new_nid.id<<endl;
+	cout<<"old_id:"<<netid.id<<"new_id:"<<new_nid.id<<endl;
 	return new_nid;
 }
 
@@ -96,8 +96,8 @@ void SfMgr::testAddNtk2(){
 
 
 	//27,24,18,17
-  uint32_t block_list_array[] ={21,12,15,20, 9,13,19,17, 22,14,18,25, 24};
-  for(int i=0;i<13;i++){
+  uint32_t block_list_array[] ={1,10,11,21,12,15,20, 9,13,19,17, 22,14,18,25, 24};
+  for(int i=0;i<16;i++){
 	block_list[block_list_array[i]]=false;
   }
   uint32_t boundary_list_array[] ={27,24,18,17};
@@ -135,18 +135,17 @@ void SfMgr::testAddNtk2(){
 		assert(createBvSliceGate(test_ntk,  ~getMapNetId3(V3NetId::makeNetId(17),design_2_Map) ,
 											getMapNetId3(V3NetId::makeNetId(3),library_2_Map) , 3,3));
 
- 	/* 
+
+	cout<<"****insert_input****"<<endl;
   V3NetId inputid0=test_ntk->getInput(1);
-  V3NetId inputid1=getMapNetId3(test_ntk->getInput(1),design_2_Map);
+  V3NetId inputid1=getMapNetId3(_designNtk->getInput(1),design_2_Map);
 	cout<<"old:"<<inputid0.id  << " type:"<<
-		(inputid0.cp ? "~" : "")<< V3GateTypeStr[new_ntk->getGateType(inputid0)]<<endl;
+		(inputid0.cp ? "~" : "")<< V3GateTypeStr[test_ntk->getGateType(inputid0)]<<endl;
 	cout<<"new:"<<inputid1.id  << " type:"<<
-		(inputid1.cp ? "~" : "")<< V3GateTypeStr[new_ntk->getGateType(inputid1)]<<endl;
+		(inputid1.cp ? "~" : "")<< V3GateTypeStr[test_ntk->getGateType(inputid1)]<<endl;
 
 
-  assert(createV3BufGate( test_ntk , getMapNetId3(test_ntk->getInput(1),design_2_Map), test_ntk->getInput(1))); 
-*/
- 
+  assert(createV3BufGate( test_ntk , getMapNetId3(_designNtk->getInput(1),design_2_Map), getMapNetId3(_designNtk->getInput(1),design_1_Map) )); 
 
   for(uint32_t i=0,j=_designNtk->getOutputSize();i<j;++i){
       V3NetId outid=_designNtk->getOutput(i);
